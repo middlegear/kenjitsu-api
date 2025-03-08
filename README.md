@@ -10,13 +10,6 @@ cors and rate limiting
 
 // how do i fox anime with many episodes not matching with episode data from anizip
 especially one piece and bleach ,naruto
-  // check on jikan meta formats and seasons input btw
-
-
-  // if input is in lowercase for anilist then capitalize it or do a matching system types;
-
-
-  /// do a max page , 40 for anilist  and max pages for jikan is 25 input validation 
 
 
   /// normalize the duborsub
@@ -26,3 +19,5 @@ especially one piece and bleach ,naruto
 
   stale revalidation
   redis storing error data 
+  is there a way to be notified of what caches have expired
+

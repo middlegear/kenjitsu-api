@@ -48,7 +48,6 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
     const newserver = toZoroServers(server);
     const newcategory = toCategory(category);
 
-    console.log(newcategory, newserver);
     const data = await zoro.fetchSources(id, newserver, newcategory);
     return reply.send({ data });
   });

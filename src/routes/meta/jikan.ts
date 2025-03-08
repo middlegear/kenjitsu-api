@@ -21,6 +21,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     perPage = Math.min(perPage, 25);
 
     const data = await jikan.search(q, page, perPage);
+
     return reply.send({ data });
   });
 
@@ -35,7 +36,11 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
     const data = await jikan.fetchInfo(malId);
 
-    await redisSetCache(cacheKey, data, 148);
+    let timecached: number;
+    const status = data.data?.status.toLowerCase().trim();
+    status === 'finished airing' ? (timecached = 148) : (timecached = 12);
+
+    if (data.success === true && data.data !== null) await redisSetCache(cacheKey, data, timecached);
 
     return reply.send({ data });
   });
@@ -55,7 +60,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
     const data = await jikan.fetchTopAiring(page, perPage, format);
 
-    await redisSetCache(cacheKey, data, 24);
+    if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 24);
 
     return reply.send({ data });
   });
@@ -75,7 +80,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
     const data = await jikan.fetchMostPopular(page, perPage, format);
 
-    await redisSetCache(cacheKey, data, 148);
+    if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 148);
 
     return reply.send({ data });
   });
@@ -94,7 +99,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
     const data = await jikan.fetchTopUpcoming(page, perPage);
 
-    await redisSetCache(cacheKey, data, 72);
+    if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 72);
 
     return reply.send({ data });
   });
@@ -112,7 +117,9 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     }
 
     const data = await jikan.fetchTopMovies(page, perPage);
-    await redisSetCache(cacheKey, data, 148);
+
+    if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 148);
+
     return reply.send({ data });
   });
 
@@ -135,7 +142,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
       const data = await jikan.fetchSeason(season, year, format, page, perPage);
 
-      await redisSetCache(cacheKey, data, 48);
+      if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 24);
       return reply.send({ data });
     },
   );
@@ -155,7 +162,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
     const data = await jikan.fetchCurrentSeason(page, perPage, format);
 
-    await redisSetCache(cacheKey, data, 48);
+    if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 24);
     return reply.send({ data });
   });
 
@@ -173,7 +180,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     }
     const data = await jikan.fetchNextSeason(page, perPage, format);
 
-    await redisSetCache(cacheKey, data, 48);
+    if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 24);
     return reply.send({ data });
   });
 
@@ -189,7 +196,8 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
     const data = await jikan.fetchAnimeCharacters(malId);
 
-    await redisSetCache(cacheKey, data, 298);
+    if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 298);
+
     return reply.send({ data });
   });
 
@@ -208,7 +216,8 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
       const data = await jikan.fetchMalEpisodes(malId, page);
 
-      await redisSetCache(cacheKey, data, 12);
+      if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 12);
+
       return reply.send({ data });
     },
   );
@@ -227,8 +236,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       }
 
       const data = await jikan.fetchMalEpisodeInfo(malId, episodeNumber);
-
-      await redisSetCache(cacheKey, data, 12);
+      if (data.success === true && data.data !== null) await redisSetCache(cacheKey, data, 12);
       return reply.send({ data });
     },
   );
@@ -250,7 +258,11 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
       const data = await jikan.fetchProviderAnimeId(malId, newprovider);
 
-      await redisSetCache(cacheKey, data, 148);
+      let timecached: number;
+      const status = data.data?.status.toLowerCase().trim();
+      status === 'finished airing' ? (timecached = 148) : (timecached = 12);
+
+      if (data.success === true && data.data !== null) await redisSetCache(cacheKey, data, timecached);
       return reply.send({ data });
     },
   );
@@ -262,8 +274,6 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       const malId = Number(request.params.malId);
       const provider = request.query.provider || 'hianime';
 
-      console.log(provider);
-
       const newprovider = toProvider(provider) as AnimeProvider;
 
       const cacheKey = `jikan-provider-episodes-${malId}-${newprovider}`;
@@ -272,9 +282,14 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       if (cachedData) {
         return reply.send({ data: cachedData });
       }
+
       const data = await jikan.fetchAnimeProviderEpisodes(malId, newprovider);
 
-      await redisSetCache(cacheKey, data, 148);
+      let timecached: number;
+      const status = data.data?.status.toLowerCase().trim();
+      status === 'finished airing' ? (timecached = 148) : (timecached = 1);
+
+      if (data.success === true && data.providerEpisodes.length > 0) await redisSetCache(cacheKey, data, timecached);
       return reply.send({ data });
     },
   );
