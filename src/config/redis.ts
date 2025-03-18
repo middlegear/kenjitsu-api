@@ -5,10 +5,8 @@ const port = Number(process.env.REDIS_PORT);
 const host = process.env.REDIS_HOST;
 const password = process.env.REDIS_PASSWORD;
 
-// Check if required environment variables are provided
 const isRedisEnabled = host && password;
 
-// Create a Redis client only if environment variables are provided
 export const redis = isRedisEnabled
   ? new Redis({
       host: host,
