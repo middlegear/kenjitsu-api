@@ -2,11 +2,10 @@ import 'dotenv/config';
 import MetaRoutes from './routes/meta/index.js';
 import AnimeRoutes from './routes/anime/index.js';
 import { notFoundRateLimiter, ratelimitOptions, ratelimitPlugin } from './config/ratelimit.js';
-import fastifyLogger from './config/logger.js';
+import Fastify from 'fastify';
 import Cors from './config/cors.js';
 
-const app = fastifyLogger;
-
+const app = Fastify({ maxParamLength: 1000, logger: true });
 async function FastifyApp() {
   //CORS
   await app.register(Cors);

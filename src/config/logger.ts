@@ -1,4 +1,6 @@
 import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
+
+/// local dev dont touch
 const fastifyLogger = Fastify({
   logger: {
     level: 'info',
