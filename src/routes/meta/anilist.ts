@@ -211,7 +211,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     '/provider-episodes/:anilistId',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
       const anilistId = Number(request.params.anilistId);
-      const provider = request.query.provider || 'hianime';
+      const provider = request.query.provider || 'hianime' || 'animekai';
 
       const newprovider = toProvider(provider) as AnimeProvider;
 
