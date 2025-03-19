@@ -26,28 +26,6 @@ export function toFormatAnilist(input: string): Format {
   throw new Error(`Invalid input: ${input}. Required inputs are: ${validFormats}`);
 }
 
-const AnimeProvider = {
-  HiAnime: 'hianime',
-  Animekai: 'animekai',
-} as const; // Ensures values are readonly
-
-type AnimeProvider = (typeof AnimeProvider)[keyof typeof AnimeProvider]; // Extracts type
-
-export function toProvider(input: string): AnimeProvider {
-  if (!input) {
-    return AnimeProvider.HiAnime;
-  }
-
-  const normalizedInput = input.trim().toLowerCase(); // Trim and convert to lowercase
-
-  if (Object.values(AnimeProvider).some(provider => provider === normalizedInput)) {
-    return normalizedInput as AnimeProvider;
-  }
-
-  const validAnimeProvider = Object.values(AnimeProvider).join(' or ');
-  throw new Error(`Invalid input: ${input}. Required inputs are: ${validAnimeProvider}`);
-}
-
 const Seasons = {
   WINTER: 'WINTER',
   SPRING: 'SPRING',
@@ -106,4 +84,27 @@ export function toZoroServers(input: string): ZoroServers {
   }
   const validInputs = Object.values(ZoroServers).join(' or ');
   throw new Error(`Invalid input: ${input}. Required inputs are: ${validInputs}`);
+}
+
+//
+const AnimeProvider = {
+  HiAnime: 'hianime',
+  Animekai: 'animekai',
+} as const; // Ensures values are readonly
+
+type AnimeProvider = (typeof AnimeProvider)[keyof typeof AnimeProvider]; // Extracts type
+
+export function toProvider(input: string): AnimeProvider {
+  if (!input) {
+    return AnimeProvider.HiAnime;
+  }
+
+  const normalizedInput = input.trim().toLowerCase(); // Trim and convert to lowercase
+
+  if (Object.values(AnimeProvider).some(provider => provider === normalizedInput)) {
+    return normalizedInput as AnimeProvider;
+  }
+
+  const validAnimeProvider = Object.values(AnimeProvider).join(' or ');
+  throw new Error(`Invalid input: ${input}. Required inputs are: ${validAnimeProvider}`);
 }

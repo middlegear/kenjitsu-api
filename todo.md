@@ -18,3 +18,7 @@ encodin and decoding uri components
 
 
 /// There is a serious problem as to how i switch providers both for animeId and Episodes
+
+
+
+Whats the fix for animekai being blocked eg 403
