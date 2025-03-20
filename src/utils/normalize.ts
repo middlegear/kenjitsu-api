@@ -15,7 +15,7 @@ export function toFormatAnilist(input: string): Format {
     input = Format.TV;
   }
 
-  const upperCaseInput = input.toUpperCase();
+  const upperCaseInput = input.toUpperCase().trim();
 
   // Check if the normalized input is a valid Format
   if (Object.values(Format).includes(upperCaseInput as Format)) {
@@ -40,7 +40,7 @@ export function toAnilistSeasons(input: string): Seasons {
     throw new Error(`Missing paramater. Pick a required paramater: ${validSeason}`);
   }
 
-  const upperCaseInput = input.toUpperCase();
+  const upperCaseInput = input.toUpperCase().trim();
 
   if (Object.values(Seasons).includes(upperCaseInput as Seasons)) {
     return upperCaseInput as Seasons;
@@ -60,7 +60,7 @@ export function toCategory(input: string): SubOrDub {
   if (!input) {
     input = SubOrDub.SUB;
   }
-  const lowerCaseInput = input.toLowerCase();
+  const lowerCaseInput = input.toLowerCase().trim();
   if (Object.values(SubOrDub).includes(lowerCaseInput as SubOrDub)) {
     return lowerCaseInput as SubOrDub;
   }
@@ -78,7 +78,7 @@ export function toZoroServers(input: string): ZoroServers {
   if (!input) {
     input = ZoroServers.HD1;
   }
-  const lowerCaseInput = input.toLowerCase();
+  const lowerCaseInput = input.toLowerCase().trim();
   if (Object.values(ZoroServers).includes(lowerCaseInput as ZoroServers)) {
     return lowerCaseInput as ZoroServers;
   }
@@ -99,7 +99,7 @@ export function toProvider(input: string): AnimeProvider {
     return AnimeProvider.HiAnime;
   }
 
-  const normalizedInput = input.trim().toLowerCase(); // Trim and convert to lowercase
+  const normalizedInput = input.toLowerCase().trim();
 
   if (Object.values(AnimeProvider).some(provider => provider === normalizedInput)) {
     return normalizedInput as AnimeProvider;

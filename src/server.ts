@@ -3,19 +3,18 @@ import MetaRoutes from './routes/meta/index.js';
 import AnimeRoutes from './routes/anime/index.js';
 import { notFoundRateLimiter, ratelimitOptions, ratelimitPlugin } from './config/ratelimit.js';
 import Fastify from 'fastify';
-import Cors from './config/cors.js';
-import { purgeCache } from './middleware/cache.js';
+import fastifyCors from '@fastify/cors';
+import { checkRedis } from './config/redis.js';
 
 const app = Fastify({ maxParamLength: 1000, logger: true });
 async function FastifyApp() {
+  //check redis
+  await checkRedis();
   //CORS
-  await app.register(Cors);
 
-  // API routes
-  app.register(MetaRoutes, { prefix: '/api/meta' });
-  app.register(AnimeRoutes, { prefix: '/api/anime' });
-  app.get('/', async (request, reply) => {
-    reply.status(200).send({ message: 'Available routes are /anime & /meta' });
+  await app.register(fastifyCors, {
+    origin: '*',
+    methods: 'GET',
   });
 
   // Rate limiting
@@ -28,6 +27,13 @@ async function FastifyApp() {
       reply.code(404).send({ message: 'Slow Down Jamal' });
     },
   );
+
+  // API routes
+  app.register(MetaRoutes, { prefix: '/api/meta' });
+  app.register(AnimeRoutes, { prefix: '/api/anime' });
+  app.get('/', async (request, reply) => {
+    reply.status(200).send({ message: 'Available routes are /anime & /meta' });
+  });
 
   // Server
 
@@ -47,7 +53,7 @@ async function FastifyApp() {
   }
 }
 FastifyApp();
-// purgeCache();
+
 export default async function handler(req: any, res: any) {
   await app.ready();
   app.server.emit('request', req, res);

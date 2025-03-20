@@ -15,7 +15,7 @@ const MEMORY_CACHE_TTL =
 const memoryCache = new Map<string, { value: any; timestamp: number }>();
 
 if (MEMORY_CACHE_ENABLED) {
-  console.log('🚀 Memory Caching Enabled');
+  console.log('🚀 Memory Caching Enabled: Doesnt work on serverless environment');
   console.log(`Memory caching TTL is ${(MEMORY_CACHE_TTL / 60000).toFixed(1)} minutes`);
 } else {
   console.log('❌ Memory Caching Disabled');

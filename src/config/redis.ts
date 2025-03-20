@@ -16,7 +16,7 @@ export const redis = isRedisEnabled
     })
   : null;
 
-async function checkRedis() {
+export async function checkRedis() {
   if (!redis) {
     console.log('❌ Redis is disabled (missing environment variables).');
     return;
@@ -29,5 +29,3 @@ async function checkRedis() {
     console.error('❌ Redis Connection Failed:', err);
   }
 }
-
-checkRedis();

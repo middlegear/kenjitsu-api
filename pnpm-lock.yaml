@@ -21,8 +21,8 @@ importers:
         specifier: ^5.2.1
         version: 5.2.1
       hakai-extensions:
-        specifier: ^1.0.7
-        version: 1.0.7
+        specifier: ^1.0.8
+        version: 1.0.8
       ioredis:
         specifier: ^5.6.0
         version: 5.6.0
@@ -31,7 +31,7 @@ importers:
         version: 7.2.2
     devDependencies:
       '@types/node':
-        specifier: ^22.13.9
+        specifier: ^22.13.10
         version: 22.13.10
       prettier:
         specifier: ^3.5.3
@@ -481,8 +481,8 @@ packages:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
 
-  electron-to-chromium@1.5.122:
-    resolution: {integrity: sha512-EML1wnwkY5MFh/xUnCvY8FrhUuKzdYhowuZExZOfwJo+Zu9OsNCI23Cgl5y7awy7HrUHSwB1Z8pZX5TI34lsUg==}
+  electron-to-chromium@1.5.123:
+    resolution: {integrity: sha512-refir3NlutEZqlKaBLK0tzlVLe5P2wDKS7UQt/3SpibizgsRAPOsqQC3ffw1nlv3ze5gjRQZYHoPymgVZkplFA==}
 
   encoding-sniffer@0.2.0:
     resolution: {integrity: sha512-ju7Wq1kg04I3HtiYIOrUrdfdDvkyO9s5XM8QAj/bN61Yo/Vb4vgJxy5vi4Yxk01gWHbrofpPtpxM8bKger9jhg==}
@@ -603,8 +603,8 @@ packages:
     resolution: {integrity: sha512-rnhwfM/PhMNJ1i17k3DuDqgj0cKx3IHxBKVv/WX1uDKqrhi2Gv3l7rhPThR/Cc6uU++dD97W9c8Y0qyw9x0jag==}
     engines: {node: '>=20'}
 
-  hakai-extensions@1.0.7:
-    resolution: {integrity: sha512-5CQTk3YyLpRy6hzP1hGeHqRTtALw5oknE76YwQmzRXXrhTKmHGX9yM24/Hd8iOGncVFJlSJIMdSK6lV1wiceVg==}
+  hakai-extensions@1.0.8:
+    resolution: {integrity: sha512-tppiAawFtoVWsrtbN3tbY1hMWpB4i3Du+Hp5sUqTrkAWR7p9UXXGAYvSociybE+loIN54F0lxw3wttoRCy18GQ==}
 
   has-symbols@1.1.0:
     resolution: {integrity: sha512-1cDNdwJ2Jaohmb3sg4OmKaMBwuC48sYni5HUw2DvsC8LjGTLK9h+eb1X6RyuOHe4hT0ULCW68iomhjUoKUqlPQ==}
@@ -1116,7 +1116,7 @@ snapshots:
   browserslist@4.24.4:
     dependencies:
       caniuse-lite: 1.0.30001706
-      electron-to-chromium: 1.5.122
+      electron-to-chromium: 1.5.123
       node-releases: 2.0.19
       update-browserslist-db: 1.1.3(browserslist@4.24.4)
 
@@ -1236,7 +1236,7 @@ snapshots:
       es-errors: 1.3.0
       gopd: 1.2.0
 
-  electron-to-chromium@1.5.122: {}
+  electron-to-chromium@1.5.123: {}
 
   encoding-sniffer@0.2.0:
     dependencies:
@@ -1415,7 +1415,7 @@ snapshots:
       responselike: 3.0.0
       type-fest: 4.37.0
 
-  hakai-extensions@1.0.7:
+  hakai-extensions@1.0.8:
     dependencies:
       '@types/crypto-js': 4.2.2
       axios: 1.8.4

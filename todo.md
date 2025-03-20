@@ -1,24 +1,23 @@
-dot env for cors, caching ,ratelimiter ,
 
-documentation  of api routes .this should containt the route and expected structure and types of data response
-test for vercel deployment , configure vercel json
+
 configure docker for render deployment
 
 
 /// to do list
 write to db when i host it my self
+write some tests if possible 
 
-encodin and decoding uri components
-  //decode uri component
-  // remember to set url for redis host env 
+
 
   stale revalidation
-  redis storing error data 
 
 
 
-/// There is a serious problem as to how i switch providers both for animeId and Episodes
 
 
 
-Whats the fix for animekai being blocked eg 403
+//documentation https://www.youtube.com/watch?v=mVDMvYQL7-A
+1 introduce both / maybe the api
+1. installation / deployment
+
+document the dot env example

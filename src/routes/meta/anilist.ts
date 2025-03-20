@@ -3,14 +3,10 @@ import { Anilist, AnimeProvider } from 'hakai-extensions';
 import { toAnilistSeasons, toFormatAnilist, toProvider } from '../../utils/normalize.js';
 import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
 import { FastifyParams, FastifyQuery } from '../../utils/types.js';
-import { ratelimitPlugin, ratelimitOptions } from '../../config/ratelimit.js';
 
 const anilist = new Anilist();
 
 export default async function AnilistRoutes(fastify: FastifyInstance) {
-  await fastify.register(ratelimitPlugin, {
-    ...ratelimitOptions,
-  });
   // api/meta/anilist
   fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
     return reply.send({ message: 'Welcome to Anilist Metadata provider' });
@@ -18,7 +14,12 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
   // api/meta/anilist?q=yoursearchquery&page=number&perpage=number
   fastify.get('/search', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
-    const q = String(request.query.q);
+    let q = request.query.q?.trim() ?? '';
+    q = decodeURIComponent(q);
+    q = q.replace(/[^\w\s\-_.]/g, '');
+    if (q.length > 100) {
+      return reply.status(400).send({ error: 'Query too long' });
+    }
     const page = Number(request.query.page) || 1;
     let perPage = Number(request.query.perPage) || 20;
     perPage = Math.min(perPage, 50);

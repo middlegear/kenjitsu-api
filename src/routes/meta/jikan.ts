@@ -15,7 +15,12 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
   // api/meta/jikan/search?q=string&page=number&perPage=number
   fastify.get('/search', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
-    const q = String(request.query.q);
+    let q = request.query.q?.trim() ?? '';
+    q = decodeURIComponent(q);
+    q = q.replace(/[^\w\s\-_.]/g, '');
+    if (q.length > 100) {
+      return reply.status(400).send({ error: 'Query too long' });
+    }
 
     const page = Number(request.query.page) || 1;
     let perPage = Number(request.query.perPage) || 20;
@@ -291,8 +296,10 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       let timecached: number;
       const status = data.data?.status.toLowerCase().trim();
       status === 'finished airing' ? (timecached = 148) : (timecached = 1);
+      console.log(status);
 
       if (data.success === true && data.providerEpisodes.length > 0) await redisSetCache(cacheKey, data, timecached);
+
       return reply.send({ data });
     },
   );

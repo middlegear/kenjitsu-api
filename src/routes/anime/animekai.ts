@@ -20,7 +20,12 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
 
   // api/anime/animekai/search?q=string&page=number
   fastify.get('/search', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
-    const q = String(request.query.q);
+    let q = request.query.q?.trim() ?? '';
+    q = decodeURIComponent(q);
+    q = q.replace(/[^\w\s\-_.]/g, '');
+    if (q.length > 100) {
+      return reply.status(400).send({ error: 'Query too long' });
+    }
     const page = Number(request.query.page) || 1;
 
     const data = await animekai.search(q, page);
@@ -55,7 +60,7 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
       const data = await animekai.fetchServers(episodeId, newcategory);
 
       if (data.data && Array.isArray(data.data) && data.data.length > 0) {
-        await redisSetCache(cacheKey, data, 1);
+        await redisSetCache(cacheKey, data, 3);
       }
 
       return reply.send({ data });

@@ -19,7 +19,12 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
 
   //api/anime/hianime/search?q=''&page=number
   fastify.get('/search', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
-    const q = String(request.query.q) as string;
+    let q = request.query.q?.trim() ?? '';
+    q = decodeURIComponent(q);
+    q = q.replace(/[^\w\s\-_.]/g, '');
+    if (q.length > 100) {
+      return reply.status(400).send({ error: 'Query too long' });
+    }
     const page = Number(request.query.page) || 1;
 
     const data = await zoro.search(q, page);
@@ -71,7 +76,7 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
       }
       const data = await zoro.fetchSources(episodeId, newserver, newcategory);
 
-      if (data?.data?.sources && Array.isArray(data.data.sources) && data.data.sources.length > 0) {
+      if (data.data?.sources && Array.isArray(data.data.sources) && data.data.sources.length > 0) {
         await redisSetCache(cacheKey, data, 1);
       }
       return reply.send({ data });
