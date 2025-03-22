@@ -9,6 +9,7 @@ import AnimekaiRoutes from './routes/anime/animekai.js';
 import HianimeRoutes from './routes/anime/hianime.js';
 import AnilistRoutes from './routes/meta/anilist.js';
 import JikanRoutes from './routes/meta/jikan.js';
+import { purgeCache } from './middleware/cache.js';
 
 const app = Fastify({ maxParamLength: 1000, logger: true });
 async function FastifyApp() {
@@ -61,3 +62,4 @@ export default async function handler(req: any, res: any) {
   await app.ready();
   app.server.emit('request', req, res);
 }
+// purgeCache();
