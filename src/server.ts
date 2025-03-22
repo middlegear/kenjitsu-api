@@ -42,7 +42,7 @@ async function FastifyApp() {
 
   try {
     const port = parseInt(process.env.PORT || '3000', 10);
-    const host = process.env.HOSTNAME || '127.0.0.1';
+    const host = process.env.HOSTNAME || '0.0.0.0';
 
     if (isNaN(port)) {
       app.log.error('Invalid PORT environment variable');
