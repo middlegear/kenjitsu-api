@@ -24,8 +24,8 @@ importers:
         specifier: ^5.2.1
         version: 5.2.1
       hakai-extensions:
-        specifier: ^1.0.8
-        version: 1.0.8
+        specifier: ^1.0.10
+        version: 1.0.10
       ioredis:
         specifier: ^5.6.0
         version: 5.6.0
@@ -429,8 +429,8 @@ packages:
     resolution: {integrity: sha512-kfzR4zzQtAE9PC7CzZsjl3aBNbXWuXiSeOCdLcPpBfGW8YuCqQHcRPFDbr/BPVmd3EEPVpuFzLyuT/cUhPr4OQ==}
     engines: {node: '>=12.20'}
 
-  caniuse-lite@1.0.30001706:
-    resolution: {integrity: sha512-3ZczoTApMAZwPKYWmwVbQMFpXBDds3/0VciVoUwPUbldlYyVLmRVuRs/PcUZtHpbLRpzzDvrvnFuREsGt6lUug==}
+  caniuse-lite@1.0.30001707:
+    resolution: {integrity: sha512-3qtRjw/HQSMlDWf+X79N206fepf4SOOU6SQLMaq/0KkZLmSjPxAkBOQQ+FxbHKfHmYLZFfdWsO3KA90ceHPSnw==}
 
   cheerio-select@2.1.0:
     resolution: {integrity: sha512-9v9kG0LvzrlcungtnJtpGNxY+fzECQKhK4EGJX2vByejiMX84MFNQw4UxPJl3bFbTMw+Dfs37XaIkCwTZfLh4g==}
@@ -681,8 +681,8 @@ packages:
     resolution: {integrity: sha512-rnhwfM/PhMNJ1i17k3DuDqgj0cKx3IHxBKVv/WX1uDKqrhi2Gv3l7rhPThR/Cc6uU++dD97W9c8Y0qyw9x0jag==}
     engines: {node: '>=20'}
 
-  hakai-extensions@1.0.8:
-    resolution: {integrity: sha512-tppiAawFtoVWsrtbN3tbY1hMWpB4i3Du+Hp5sUqTrkAWR7p9UXXGAYvSociybE+loIN54F0lxw3wttoRCy18GQ==}
+  hakai-extensions@1.0.10:
+    resolution: {integrity: sha512-16Elskt9b5OAoGmEFP4cV1IfMN9zRDRE6tlZQWVAt+yd/SZIv0LELRP3AMCMFOO5x2+0ptuPmsOM67qx+ktpcw==}
 
   has-symbols@1.1.0:
     resolution: {integrity: sha512-1cDNdwJ2Jaohmb3sg4OmKaMBwuC48sYni5HUw2DvsC8LjGTLK9h+eb1X6RyuOHe4hT0ULCW68iomhjUoKUqlPQ==}
@@ -1037,8 +1037,8 @@ packages:
     resolution: {integrity: sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==}
     engines: {node: '>=12.20'}
 
-  type-fest@4.37.0:
-    resolution: {integrity: sha512-S/5/0kFftkq27FPNye0XM1e2NsnoD/3FS+pBmbjmmtLT6I+i344KoOf7pvXreaFsDamWeaJX55nczA1m5PsBDg==}
+  type-fest@4.38.0:
+    resolution: {integrity: sha512-2dBz5D5ycHIoliLYLi0Q2V7KRaDlH0uWIvmk7TYlAg5slqwiPv1ezJdZm1QEM0xgk29oYWMCbIG7E6gHpvChlg==}
     engines: {node: '>=16'}
 
   typescript@5.8.2:
@@ -1338,7 +1338,7 @@ snapshots:
 
   browserslist@4.24.4:
     dependencies:
-      caniuse-lite: 1.0.30001706
+      caniuse-lite: 1.0.30001707
       electron-to-chromium: 1.5.123
       node-releases: 2.0.19
       update-browserslist-db: 1.1.3(browserslist@4.24.4)
@@ -1364,7 +1364,7 @@ snapshots:
 
   callsites@4.2.0: {}
 
-  caniuse-lite@1.0.30001706: {}
+  caniuse-lite@1.0.30001707: {}
 
   cheerio-select@2.1.0:
     dependencies:
@@ -1676,9 +1676,9 @@ snapshots:
       lowercase-keys: 3.0.0
       p-cancelable: 4.0.1
       responselike: 3.0.0
-      type-fest: 4.37.0
+      type-fest: 4.38.0
 
-  hakai-extensions@1.0.8:
+  hakai-extensions@1.0.10:
     dependencies:
       '@types/crypto-js': 4.2.2
       axios: 1.8.4
@@ -2016,7 +2016,7 @@ snapshots:
 
   type-fest@2.19.0: {}
 
-  type-fest@4.37.0: {}
+  type-fest@4.38.0: {}
 
   typescript@5.8.2: {}
 
