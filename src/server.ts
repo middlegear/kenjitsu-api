@@ -7,7 +7,8 @@ import AnimekaiRoutes from './routes/anime/animekai.js';
 import HianimeRoutes from './routes/anime/hianime.js';
 import AnilistRoutes from './routes/meta/anilist.js';
 import JikanRoutes from './routes/meta/jikan.js';
-
+import { purgeCache } from './middleware/cache.js';
+purgeCache();
 const app = Fastify({ maxParamLength: 1000, logger: true });
 async function FastifyApp() {
   //CORS

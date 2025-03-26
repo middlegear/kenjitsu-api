@@ -72,7 +72,7 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
       const data = await zoro.fetchSources(episodeId, newserver, newcategory);
 
       if (data.data?.sources && Array.isArray(data.data.sources) && data.data.sources.length > 0) {
-        await redisSetCache(cacheKey, data, 1);
+        await redisSetCache(cacheKey, data, 0.1);
       }
       return reply.send({ data });
     },

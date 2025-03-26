@@ -94,7 +94,7 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
       }
       const data = await animekai.fetchSources(episodeId, newcategory);
       if (data?.data?.sources && Array.isArray(data.data.sources) && data.data.sources.length > 0) {
-        await redisSetCache(cacheKey, data, 1);
+        await redisSetCache(cacheKey, data, 0.1);
       }
 
       return reply.send({ data });
