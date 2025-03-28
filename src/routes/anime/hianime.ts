@@ -51,7 +51,7 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
   fastify.get('/servers/:episodeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     const episodeId = String(request.params.episodeId);
 
-    reply.header('Cache-Control', 's-maxage=7200, stale-while-revalidate=300');
+    reply.header('Cache-Control', 's-maxage=3600, stale-while-revalidate=300');
 
     const data = await zoro.fetchEpisodeServers(episodeId);
 
@@ -68,7 +68,7 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
       const newserver = toZoroServers(server);
       const newcategory = toCategory(category);
 
-      reply.header('Cache-Control', 's-maxage=600, stale-while-revalidate=180');
+      reply.header('Cache-Control', 's-maxage=300, stale-while-revalidate=180');
 
       const cacheKey = `zoro-watch-${episodeId}-${newcategory}-${newserver}`;
       const cachedData = await redisGetCache(cacheKey);

@@ -250,7 +250,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
       let timecached: number;
       const status = data.data?.status.toLowerCase().trim();
-      status === 'finished' ? (timecached = 148) : (timecached = 1);
+      status === 'finished' ? (timecached = 24) : (timecached = 1);
 
       reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`);
 

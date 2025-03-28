@@ -317,7 +317,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
       let timecached: number;
       const status = data.data?.status.toLowerCase().trim();
-      status === 'finished airing' ? (timecached = 72) : (timecached = 1);
+      status === 'finished airing' ? (timecached = 24) : (timecached = 1);
       reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`);
 
       const cacheKey = `jikan-provider-episodes-${malId}-${newprovider}`;
