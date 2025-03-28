@@ -23,30 +23,35 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
     }
     const page = Number(request.query.page) || 1;
 
+    reply.header('Cache-Control', 's-maxage=86400, stale-while-revalidate=300');
+
     const data = await animekai.search(q, page);
-    return reply.header('Cache-Control', 's-maxage=86400, stale-while-revalidate=300').send({ data });
+    return reply.send({ data });
   });
 
   fastify.get('/info/:animeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     const animeId = String(request.params.animeId);
     const cacheKey = `animekai-episodesinfo-${animeId}`;
+
+    let timecached: number;
+
+    const data = await animekai.fetchAnimeInfo(animeId);
+    const status = data.data?.status?.toLowerCase().trim();
+    status === 'completed' ? (timecached = 24) : (timecached = 1);
+
+    reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`);
+
     const cachedData = await redisGetCache(cacheKey);
+
     if (cachedData) {
       return reply.send({
         data: cachedData,
       });
     }
-    let cacheTime = 30; // 1 min
-    const data = await animekai.fetchAnimeInfo(animeId);
 
-    const status = data.data?.status?.toLowerCase().trim();
-    if (status === 'completed') {
-      cacheTime = 60 * 12; // 12 hours if completed try a test with 24 hrs
-      await redisSetCache(cacheKey, data, 148);
-    }
-    /// 30 for airing while 12 hours for completed revalidation 5 mins
+    if (data.success === true && data.providerEpisodes.length > 0) await redisSetCache(cacheKey, data, timecached);
 
-    return reply.header('Cache-Control', `s-maxage=${cacheTime * 60}, stale-while-revalidate=300`).send({ data });
+    return reply.send({ data });
   });
 
   //api/animekai/servers/:episodeId&category=''
@@ -57,10 +62,11 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
       const category = request.query.category || 'sub';
 
       const newcategory = toCategory(category);
+      reply.header('Cache-Control', 's-maxage=120, stale-while-revalidate=180');
 
       const data = await animekai.fetchServers(episodeId, newcategory);
 
-      return reply.header('Cache-Control', `s-maxage=300, stale-while-revalidate=300`).send({ data });
+      return reply.send({ data });
     },
   );
 
@@ -73,9 +79,11 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
 
       const newcategory = toCategory(category);
 
+      reply.header('Cache-Control', 's-maxage=120, stale-while-revalidate=180');
+
       const data = await animekai.fetchSources(episodeId, newcategory);
 
-      return reply.header('Cache-Control', `s-maxage=300, stale-while-revalidate=300`).send({ data });
+      return reply.send({ data });
     },
   );
 }

@@ -26,9 +26,11 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     let perPage = Number(request.query.perPage) || 20;
     perPage = Math.min(perPage, 25);
 
+    reply.header('Cache-Control', 's-maxage=86400, stale-while-revalidate=300');
+
     const data = await jikan.search(q, page, perPage);
 
-    return reply.header('Cache-Control', 's-maxage=86400, stale-while-revalidate=300').send({ data });
+    return reply.send({ data });
   });
 
   // api/jikan/info/:malId
@@ -36,10 +38,6 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     const malId = Number(request.params.malId);
 
     const cacheKey = `jikan-info-${malId}`;
-    const cachedData = await redisGetCache(cacheKey);
-    if (cachedData) {
-      return reply.send({ cachedData });
-    }
 
     const data = await jikan.fetchInfo(malId);
 
@@ -47,9 +45,16 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     const status = data.data?.status.toLowerCase().trim();
     status === 'finished airing' ? (timecached = 148) : (timecached = 4);
 
+    reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`);
+
+    const cachedData = await redisGetCache(cacheKey);
+    if (cachedData) {
+      return reply.send({ cachedData });
+    }
+
     if (data.success === true && data.data !== null) await redisSetCache(cacheKey, data, timecached);
 
-    return reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`).send({ data });
+    return reply.send({ data });
   });
 
   // api/jikan/top-airing?page=number&perPage=number&format=format
@@ -58,6 +63,8 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     let perPage = Number(request.query.perPage) || 20;
     perPage = Math.min(perPage, 25);
     const format = (request.query.format as Format) || 'TV';
+
+    reply.header('Cache-Control', `s-maxage=${6 * 60 * 60}, stale-while-revalidate=300`);
 
     const cacheKey = `jikan-top-airing-${page}-${perPage}-${format}`;
     const cachedData = await redisGetCache(cacheKey);
@@ -69,7 +76,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
     if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 6);
 
-    return reply.header('Cache-Control', `s-maxage=${6 * 60 * 60}, stale-while-revalidate=300`).send({ data });
+    return reply.send({ data });
   });
 
   //api/jikan/most-popular?page=number&perPage=number&format=format
@@ -78,6 +85,8 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     let perPage = Number(request.query.perPage) || 20;
     perPage = Math.min(perPage, 25);
     const format = (request.query.format as Format) || 'TV';
+
+    reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
     const cacheKey = `jikan-most-popular${page}-${perPage}-${format}`;
     const cachedData = await redisGetCache(cacheKey);
@@ -89,7 +98,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
     if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 24);
 
-    return reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`).send({ data });
+    return reply.send({ data });
   });
 
   //api/jikan/upcoming?page=number&perPage=number
@@ -97,6 +106,8 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     const page = Number(request.query.page) || 1;
     let perPage = Number(request.query.perPage) || 20;
     perPage = Math.min(perPage, 25);
+
+    reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
     const cacheKey = `jikan-upcoming-${page}-${perPage}`;
     const cachedData = await redisGetCache(cacheKey);
@@ -108,7 +119,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
     if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 24);
 
-    return reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`).send({ data });
+    return reply.send({ data });
   });
 
   //api/jikan/movies?page=number&perPage=number
@@ -116,6 +127,8 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     const page = Number(request.query.page) || 1;
     let perPage = Number(request.query.perPage) || 20;
     perPage = Math.min(perPage, 25);
+
+    reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
     const cacheKey = `jikan-movies-category-${page}-${perPage}`;
     const cachedData = await redisGetCache(cacheKey);
@@ -127,7 +140,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
     if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 24);
 
-    return reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`).send({ data });
+    return reply.send({ data });
   });
 
   //api/jikan/seasons/:season/:year?page=number&perPage=number
@@ -141,6 +154,8 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       let perPage = Number(request.query.perPage) || 20;
       perPage = Math.min(perPage, 25);
 
+      reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
+
       const cacheKey = `jikan-seasons-${season}-${year}-${page}-${perPage}-${format}`;
       const cachedData = await redisGetCache(cacheKey);
       if (cachedData) {
@@ -151,7 +166,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
       if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 24);
 
-      return reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`).send({ data });
+      return reply.send({ data });
     },
   );
 
@@ -161,6 +176,8 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     const page = Number(request.query.page) || 1;
     let perPage = Number(request.query.perPage) || 20;
     perPage = Math.min(perPage, 25);
+
+    reply.header('Cache-Control', `s-maxage=${6 * 60 * 60}, stale-while-revalidate=300`);
 
     const cacheKey = `jikan-current-season-${page}-${perPage}-${format}`;
     const cachedData = await redisGetCache(cacheKey);
@@ -172,7 +189,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
     if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 6);
 
-    return reply.header('Cache-Control', `s-maxage=${6 * 60 * 60}, stale-while-revalidate=300`).send({ data });
+    return reply.send({ data });
   });
 
   //api/jikan/next-season?page=number&perPage=number&format=string
@@ -183,6 +200,9 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     perPage = Math.min(perPage, 25);
 
     const cacheKey = `jikan-next-season-${page}-${perPage}-${format}`;
+
+    reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
+
     const cachedData = await redisGetCache(cacheKey);
     if (cachedData) {
       return reply.send({ data: cachedData });
@@ -190,12 +210,14 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     const data = await jikan.fetchNextSeason(page, perPage, format);
 
     if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 24);
-    return reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`).send({ data });
+    return reply.send({ data });
   });
 
   //api/jikan/characters/:malId
   fastify.get('/characters/:malId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     const malId = Number(request.params.malId);
+
+    reply.header('Cache-Control', `s-maxage=${72 * 60 * 60}, stale-while-revalidate=300`);
 
     const cacheKey = `jikan-characters-${malId}`;
     const cachedData = await redisGetCache(cacheKey);
@@ -207,7 +229,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
     if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 72);
 
-    return reply.header('Cache-Control', `s-maxage=${72 * 60 * 60}, stale-while-revalidate=300`).send({ data });
+    return reply.send({ data });
   });
 
   //api/jikan/mal-episodes/:malId?page=number
@@ -216,6 +238,8 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     async (request: FastifyRequest<{ Params: FastifyParams; Querystring: FastifyQuery }>, reply: FastifyReply) => {
       const malId = Number(request.params.malId);
       const page = Number(request.query.page) || 1;
+
+      reply.header('Cache-Control', `s-maxage=${6 * 60 * 60}, stale-while-revalidate=300`);
 
       const cacheKey = `mal-episodes-${malId}-${page}`;
       const cachedData = await redisGetCache(cacheKey);
@@ -227,7 +251,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
       if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 5);
 
-      return reply.header('Cache-Control', `s-maxage=${6 * 60 * 60}, stale-while-revalidate=300`).send({ data });
+      return reply.send({ data });
     },
   );
 
@@ -238,6 +262,8 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       const malId = Number(request.params.malId);
       const episodeNumber = Number(request.params.episodeNumber);
 
+      reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
+
       const cacheKey = `mal-episode-info${malId}-${episodeNumber}`;
       const cachedData = await redisGetCache(cacheKey);
       if (cachedData) {
@@ -247,7 +273,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       const data = await jikan.fetchMalEpisodeInfo(malId, episodeNumber);
 
       if (data.success === true && data.data !== null) await redisSetCache(cacheKey, data, 24);
-      return reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`).send({ data });
+      return reply.send({ data });
     },
   );
 
@@ -259,21 +285,22 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       const provider = request.query.provider || 'hianime';
       const newprovider = toProvider(provider) as AnimeProvider;
 
-      const cacheKey = `jikan-provider-id-${malId}-${newprovider}`;
-
-      const cachedData = await redisGetCache(cacheKey);
-      if (cachedData) {
-        return reply.send({ data: cachedData });
-      }
-
       const data = await jikan.fetchProviderAnimeId(malId, newprovider);
 
       let timecached: number;
       const status = data.data?.status.toLowerCase().trim();
       status === 'finished airing' ? (timecached = 148) : (timecached = 12);
 
+      reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`);
+
+      const cacheKey = `jikan-provider-id-${malId}-${newprovider}`;
+      const cachedData = await redisGetCache(cacheKey);
+      if (cachedData) {
+        return reply.send({ data: cachedData });
+      }
+
       if (data.success === true && data.data !== null) await redisSetCache(cacheKey, data, timecached);
-      return reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`).send({ data });
+      return reply.send({ data });
     },
   );
 
@@ -286,23 +313,22 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
       const newprovider = toProvider(provider) as AnimeProvider;
 
-      const cacheKey = `jikan-provider-episodes-${malId}-${newprovider}`;
+      const data = await jikan.fetchAnimeProviderEpisodes(malId, newprovider);
 
+      let timecached: number;
+      const status = data.data?.status.toLowerCase().trim();
+      status === 'finished airing' ? (timecached = 72) : (timecached = 1);
+      reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`);
+
+      const cacheKey = `jikan-provider-episodes-${malId}-${newprovider}`;
       const cachedData = await redisGetCache(cacheKey);
       if (cachedData) {
         return reply.send({ data: cachedData });
       }
 
-      const data = await jikan.fetchAnimeProviderEpisodes(malId, newprovider);
-
-      let timecached: number;
-      const status = data.data?.status.toLowerCase().trim();
-      status === 'finished airing' ? (timecached = 148) : (timecached = 1);
-      console.log(status);
-
       if (data.success === true && data.providerEpisodes.length > 0) await redisSetCache(cacheKey, data, timecached);
 
-      return reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`).send({ data });
+      return reply.send({ data });
     },
   );
 }

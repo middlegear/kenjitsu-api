@@ -22,30 +22,40 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
     }
     const page = Number(request.query.page) || 1;
 
+    reply.header('Cache-Control', 's-maxage=86400, stale-while-revalidate=300');
+
     const data = await zoro.search(q, page);
-    return reply.header('Cache-Control', 's-maxage=86400, stale-while-revalidate=300').send({ data });
+    return reply.send({ data });
   });
 
   fastify.get('/info/:animeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     const animeId = String(request.params.animeId);
 
+    reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+
     const data = await zoro.fetchInfo(animeId);
 
-    return reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300').send({ data });
+    return reply.send({ data });
   });
 
   fastify.get('/episodes/:animeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     const animeId = String(request.params.animeId);
+
+    reply.header('Cache-Control', 's-maxage=7200, stale-while-revalidate=300');
+
     const data = await zoro.fetchEpisodes(animeId);
 
-    return reply.header('Cache-Control', 's-maxage=14400, stale-while-revalidate=300').send({ data });
+    return reply.send({ data });
   });
 
   fastify.get('/servers/:episodeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     const episodeId = String(request.params.episodeId);
+
+    reply.header('Cache-Control', 's-maxage=7200, stale-while-revalidate=300');
+
     const data = await zoro.fetchEpisodeServers(episodeId);
 
-    return reply.header('Cache-Control', 's-maxage=14400, stale-while-revalidate=300').send({ data });
+    return reply.send({ data });
   });
 
   fastify.get(
@@ -57,6 +67,8 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
 
       const newserver = toZoroServers(server);
       const newcategory = toCategory(category);
+
+      reply.header('Cache-Control', 's-maxage=600, stale-while-revalidate=180');
 
       const cacheKey = `zoro-watch-${episodeId}-${newcategory}-${newserver}`;
       const cachedData = await redisGetCache(cacheKey);
@@ -70,7 +82,7 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
       if (data.data?.sources && Array.isArray(data.data.sources) && data.data.sources.length > 0) {
         await redisSetCache(cacheKey, data, 0.1);
       }
-      reply.header('Cache-Control', 's-maxage=120, stale-while-revalidate=180').send({ data });
+      return reply.send({ data });
     },
   );
 }
