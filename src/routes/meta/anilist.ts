@@ -23,7 +23,8 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     perPage = Math.min(perPage, 50);
 
     const data = await anilist.search(q, page, perPage);
-    return reply.send({ data });
+
+    return reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`).send({ data });
   });
 
   fastify.get('/info/:anilistId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
@@ -37,11 +38,11 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     const data = await anilist.fetchInfo(anilistId);
     let timecached: number;
     const status = data.data?.status.toLowerCase().trim();
-    status === 'finished' ? (timecached = 148) : (timecached = 24);
+    status === 'finished' ? (timecached = 148) : (timecached = 12);
 
     if (data.success === true && data.data !== null) await redisSetCache(cacheKey, data, timecached);
 
-    return reply.send({ data });
+    return reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`).send({ data });
   });
 
   fastify.get('/top-airing', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
@@ -56,12 +57,12 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     }
     const data = await anilist.fetchAiring(page, perPage);
 
-    if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 24);
+    if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 6);
 
-    return reply.send({ data });
+    return reply.header('Cache-Control', `s-maxage=${6 * 60 * 60}, stale-while-revalidate=300`).send({ data });
   });
 
-  // api/meta/anilist/most-popular?format=string&page=number&perPage=number
+  // api/anilist/most-popular?format=string&page=number&perPage=number
   fastify.get('/most-popular', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     const format = request.query.format || 'TV';
     const page = Number(request.query.page) || 1;
@@ -79,10 +80,10 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     const data = await anilist.fetchMostPopular(page, perPage, newformat);
 
     if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 148);
-    return reply.send({ data });
+    return reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`).send({ data });
   });
 
-  // api/meta/anilist/top-anime?format=string&page=number&perPage=number
+  // api/anilist/top-anime?format=string&page=number&perPage=number
   fastify.get('/top-anime', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     const format = request.query.format || 'TV';
     const page = Number(request.query.page) || 1;
@@ -99,11 +100,11 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
     const data = await anilist.fetchTopRatedAnime(page, perPage, newformat);
 
-    if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 148);
-    return reply.send({ data });
+    if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 24);
+    return reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`).send({ data });
   });
 
-  // api/meta/anilist/upcoming?page=number&perPage=number
+  // api/anilist/upcoming?page=number&perPage=number
   fastify.get('/upcoming', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     const page = Number(request.query.page) || 1;
     let perPage = Number(request.query.perPage) || 20;
@@ -117,19 +118,19 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
     const data = await anilist.fetchTopUpcoming(page, perPage);
 
-    if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 24);
+    if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 12);
 
-    return reply.send({ data });
+    return reply.header('Cache-Control', `s-maxage=${12 * 60 * 60}, stale-while-revalidate=300`).send({ data });
   });
 
-  // api/meta/anilist/characters/:anilistId
+  // api/anilist/characters/:anilistId
   fastify.get('/characters/:anilistId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     const anilistId = Number(request.params.anilistId);
     const data = await anilist.fetchCharacters(anilistId);
-    return reply.send({ data });
+    return reply.header('Cache-Control', `s-maxage=${48 * 60 * 60}, stale-while-revalidate=300`).send({ data });
   });
 
-  // api/meta/anilist/trending?page=number&perPage=number
+  // api/anilist/trending?page=number&perPage=number
   fastify.get('/trending', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     const page = Number(request.query.page) || 1;
     let perPage = Number(request.query.perPage) || 20;
@@ -143,20 +144,20 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     }
     const data = await anilist.fetchTrending(page, perPage);
 
-    if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 6);
+    if (data.success === true && data.data.length > 0) await redisSetCache(cacheKey, data, 1);
 
-    return reply.send({ data });
+    return reply.header('Cache-Control', `s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`).send({ data });
   });
 
-  // api/meta/anilist/related/:anilistId
+  // api/anilist/related/:anilistId
   fastify.get('/related/:anilistId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     const anilistId = Number(request.params.anilistId);
 
     const data = await anilist.fetchRelatedAnime(anilistId);
-    return reply.send({ data });
+    return reply.header('Cache-Control', `s-maxage=${48 * 60 * 60}, stale-while-revalidate=300`).send({ data });
   });
 
-  // api/meta/anilist/seasons/:season/:year?format=string
+  // api/anilist/seasons/:season/:year?format=string
   fastify.get(
     '/seasons/:season/:year',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
@@ -172,11 +173,11 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
       const data = await anilist.fetchSeasonalAnime(newseason, year, newformat, page, perPage);
 
-      return reply.send({ data });
+      return reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`).send({ data });
     },
   );
 
-  //api/meta/anilist/get-provider/:anilistId?provider=string
+  //api/anilist/get-provider/:anilistId?provider=string
   fastify.get(
     '/get-provider/:anilistId',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
@@ -199,11 +200,11 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
       if (data.success === true && data.animeProvider !== null) await redisSetCache(cacheKey, data, timecached);
 
-      return reply.send({ data });
+      return reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`).send({ data });
     },
   );
 
-  //api/meta/anilist/provider-episodes/:anilistId?provider=string
+  //api/anilist/provider-episodes/:anilistId?provider=string
   fastify.get(
     '/provider-episodes/:anilistId',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
@@ -226,7 +227,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
       if (data.success === true && data.providerEpisodes.length > 0) await redisSetCache(cacheKey, data, timecached);
 
-      return reply.send({ data });
+      return reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`).send({ data });
     },
   );
 }

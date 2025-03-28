@@ -3,14 +3,10 @@ import { HiAnime } from 'hakai-extensions';
 import { toZoroServers, toCategory } from '../../utils/normalize.js';
 import { FastifyParams, FastifyQuery } from '../../utils/types.js';
 import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
-import { ratelimitOptions, ratelimitPlugin } from '../../config/ratelimit.js';
 
 const zoro = new HiAnime();
 
 export default async function HianimeRoutes(fastify: FastifyInstance) {
-  await fastify.register(ratelimitPlugin, {
-    ...ratelimitOptions,
-  });
   fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
     return reply.send({
       message: 'Welcome to Hianime Provider',
@@ -27,7 +23,7 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
     const page = Number(request.query.page) || 1;
 
     const data = await zoro.search(q, page);
-    return reply.send({ data });
+    return reply.header('Cache-Control', 's-maxage=86400, stale-while-revalidate=300').send({ data });
   });
 
   fastify.get('/info/:animeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
@@ -35,21 +31,21 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
 
     const data = await zoro.fetchInfo(animeId);
 
-    return reply.send({ data });
+    return reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300').send({ data });
   });
 
   fastify.get('/episodes/:animeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     const animeId = String(request.params.animeId);
     const data = await zoro.fetchEpisodes(animeId);
 
-    return reply.send({ data });
+    return reply.header('Cache-Control', 's-maxage=14400, stale-while-revalidate=300').send({ data });
   });
 
   fastify.get('/servers/:episodeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     const episodeId = String(request.params.episodeId);
     const data = await zoro.fetchEpisodeServers(episodeId);
 
-    return reply.send({ data });
+    return reply.header('Cache-Control', 's-maxage=14400, stale-while-revalidate=300').send({ data });
   });
 
   fastify.get(
@@ -74,7 +70,7 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
       if (data.data?.sources && Array.isArray(data.data.sources) && data.data.sources.length > 0) {
         await redisSetCache(cacheKey, data, 0.1);
       }
-      return reply.send({ data });
+      reply.header('Cache-Control', 's-maxage=120, stale-while-revalidate=180').send({ data });
     },
   );
 }
