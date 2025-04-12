@@ -24,15 +24,15 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2
       hakai-extensions:
-        specifier: ^1.0.14
-        version: 1.0.14
+        specifier: ^1.0.15
+        version: 1.0.15
       ioredis:
         specifier: ^5.6.1
         version: 5.6.1
     devDependencies:
       '@types/node':
-        specifier: ^22.14.0
-        version: 22.14.0
+        specifier: ^22.14.1
+        version: 22.14.1
       prettier:
         specifier: ^3.5.3
         version: 3.5.3
@@ -264,8 +264,8 @@ packages:
   '@types/http-cache-semantics@4.0.4':
     resolution: {integrity: sha512-1m0bIFVc7eJWyve9S0RnuRgcQqF/Xd5QsUZAZeQFr1Q3/p9JWoQQEqmVy+DPTNpGXwhgIetAoYF8JSc33q29QA==}
 
-  '@types/node@22.14.0':
-    resolution: {integrity: sha512-Kmpl+z84ILoG+3T/zQFyAJsU6EPTmOCj8/2+83fSN6djd6I4o7uOuGIH6vq3PrjY5BGitSbFuMN18j3iknubbA==}
+  '@types/node@22.14.1':
+    resolution: {integrity: sha512-u0HuPQwe/dHrItgHHpmw3N2fYCR6x4ivMNbPHRkBVP4CvN+kiRrKHWk3i8tXiO/joPwXLMYvF9TTF0eqgHIuOw==}
 
   abstract-logging@2.0.1:
     resolution: {integrity: sha512-2BjRTZxTPvheOvGbBslFSYOUkr+SjPtOnrLP33f+VIWLzezQpZcqVg7ja3L4dBXmzzgwT+a029jRx5PCi3JuiA==}
@@ -600,8 +600,8 @@ packages:
     resolution: {integrity: sha512-DI8zV1231tqiGzOiOzQWDhsBmncFW7oQDH6Zgy6pDPrqJuVZMtoSgPLLsBZQj8Jg4JFfwoOsDA8NGtLQLnIx2g==}
     engines: {node: '>=20'}
 
-  hakai-extensions@1.0.14:
-    resolution: {integrity: sha512-WC+PoQkjTNiZu1YLIgPW35UTcJxL8lAdafWlpnbnL70cJyWzEZWvOmP9rGAmleUmN4RixvF9upe4igc+BU+H9Q==}
+  hakai-extensions@1.0.15:
+    resolution: {integrity: sha512-kI2X8oAJcDdcGRxwYlmlyCyZ4u3NdQcFSULGzB3LvtYXS0+sFIZp1AU9ENXzofIMQ32hQd5eVI7rVoNCl5rF7g==}
 
   has-symbols@1.1.0:
     resolution: {integrity: sha512-1cDNdwJ2Jaohmb3sg4OmKaMBwuC48sYni5HUw2DvsC8LjGTLK9h+eb1X6RyuOHe4hT0ULCW68iomhjUoKUqlPQ==}
@@ -1152,7 +1152,7 @@ snapshots:
 
   '@types/http-cache-semantics@4.0.4': {}
 
-  '@types/node@22.14.0':
+  '@types/node@22.14.1':
     dependencies:
       undici-types: 6.21.0
 
@@ -1548,7 +1548,7 @@ snapshots:
       responselike: 3.0.0
       type-fest: 4.39.1
 
-  hakai-extensions@1.0.14:
+  hakai-extensions@1.0.15:
     dependencies:
       '@types/crypto-js': 4.2.2
       axios: 1.8.4
