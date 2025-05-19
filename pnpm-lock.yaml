@@ -24,8 +24,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       hakai-extensions:
-        specifier: ^1.0.19
-        version: 1.0.19
+        specifier: ^1.0.20
+        version: 1.0.20
       ioredis:
         specifier: ^5.6.1
         version: 5.6.1
@@ -460,8 +460,8 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  electron-to-chromium@1.5.152:
-    resolution: {integrity: sha512-xBOfg/EBaIlVsHipHl2VdTPJRSvErNUaqW8ejTq5OlOlIYx1wOllCHsAvAIrr55jD1IYEfdR86miUEt8H5IeJg==}
+  electron-to-chromium@1.5.155:
+    resolution: {integrity: sha512-ps5KcGGmwL8VaeJlvlDlu4fORQpv3+GIcF5I3f9tUKUlJ/wsysh6HU8P5L1XWRYeXfA0oJd4PyM8ds8zTFf6Ng==}
 
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -604,8 +604,8 @@ packages:
     resolution: {integrity: sha512-DI8zV1231tqiGzOiOzQWDhsBmncFW7oQDH6Zgy6pDPrqJuVZMtoSgPLLsBZQj8Jg4JFfwoOsDA8NGtLQLnIx2g==}
     engines: {node: '>=20'}
 
-  hakai-extensions@1.0.19:
-    resolution: {integrity: sha512-LzKybj6G6DD8x4pnfseunS4WzpqHQC8q1/abhXv1Fc97D2cunzwKoQB32VyMiSrJfrJ/ZBm2FKvDpAuROLQcEw==}
+  hakai-extensions@1.0.20:
+    resolution: {integrity: sha512-YGHtxj+8lABGdK0aJLwv2ePDG5ZEaTAkkZThh43b/aOFHFrveqZbYH/5B5tjdpvpAokVmRPdxgC51O9eYzO/ww==}
 
   has-symbols@1.1.0:
     resolution: {integrity: sha512-1cDNdwJ2Jaohmb3sg4OmKaMBwuC48sYni5HUw2DvsC8LjGTLK9h+eb1X6RyuOHe4hT0ULCW68iomhjUoKUqlPQ==}
@@ -1216,7 +1216,7 @@ snapshots:
   browserslist@4.24.5:
     dependencies:
       caniuse-lite: 1.0.30001718
-      electron-to-chromium: 1.5.152
+      electron-to-chromium: 1.5.155
       node-releases: 2.0.19
       update-browserslist-db: 1.1.3(browserslist@4.24.5)
 
@@ -1356,7 +1356,7 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  electron-to-chromium@1.5.152: {}
+  electron-to-chromium@1.5.155: {}
 
   emoji-regex@8.0.0: {}
 
@@ -1557,7 +1557,7 @@ snapshots:
       responselike: 3.0.0
       type-fest: 4.41.0
 
-  hakai-extensions@1.0.19:
+  hakai-extensions@1.0.20:
     dependencies:
       '@types/crypto-js': 4.2.2
       axios: 1.9.0
