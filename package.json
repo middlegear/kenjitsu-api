@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/middlegear/api-hakai#readme",
   "devDependencies": {
-    "@types/node": "^22.15.31",
+    "@types/node": "^22.15.32",
     "prettier": "^3.5.3",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"
@@ -36,7 +36,7 @@
     "@fastify/static": "^8.2.0",
     "dotenv": "^16.5.0",
     "fastify": "^5.4.0",
-    "hakai-extensions": "^1.0.21",
+    "hakai-extensions": "^1.1.0",
     "ioredis": "^5.6.1"
   }
 }
