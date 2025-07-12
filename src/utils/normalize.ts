@@ -71,12 +71,13 @@ export function toCategory(input: string): SubOrDub {
 const ZoroServers = {
   HD1: 'hd-1',
   HD2: 'hd-2',
+  HD3: 'hd-3',
 } as const;
 type ZoroServers = (typeof ZoroServers)[keyof typeof ZoroServers];
 
 export function toZoroServers(input: string): ZoroServers {
   if (!input) {
-    input = ZoroServers.HD1;
+    input = ZoroServers.HD2;
   }
   const lowerCaseInput = input.toLowerCase().trim();
   if (Object.values(ZoroServers).includes(lowerCaseInput as ZoroServers)) {
