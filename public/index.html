@@ -2,87 +2,111 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Hakai API</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hakai API</title>
     <link rel="icon" type="image/png"
-        href="https://m3jz13d05b.ufs.sh/f/dLgmbGNJLXerMjDNawBovlI3sdb2nkrUQc6OBfxYZGS19XE7">
+        href="https://m3jz13d05b.ufs.sh/f/dLgmbGNJLXerMjDNawBovlI3sdb2nkrUQc6OBfxYZGS19XE7" />
     <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(1.25rem);
+                /* 20px */
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #f0f8ff;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            color: #E0E0E0;
+            /* Light text for dark background */
             text-align: center;
-            padding: 80px 20px;
-            background: linear-gradient(135deg, #6a0dad, #4a0080);
+            background-color: #121212;
+            /* Even darker background */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             margin: 0;
-            /* Reset default margin */
             padding: 0;
-            /* Reset default padding */
+            overflow: hidden;
+            /* Prevent scrollbar from animation */
         }
 
-
-
-
-        .content-container {
-            max-width: 600px;
-            width: 100%;
-        }
-
-        img {
-            border-radius: 5%;
-            max-width: 500px;
-            /* Reduced image size */
-            height: auto;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+        main {
+            max-width: 37.5rem;
+            /* 600px */
+            width: 90%;
+            /* Responsive width */
+            padding: 1.5rem;
+            /* 24px */
+            box-sizing: border-box;
+            animation: fadeIn 1s ease-out forwards;
         }
 
         h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-size: 3rem;
+            /* Larger, more impactful heading */
+            margin-bottom: 0.625rem;
+            /* 10px */
+            text-shadow: 0 0 0.625rem rgba(150, 0, 255, 0.7);
+            /* Subtle glow effect */
+            color: #F0F8FF;
+            /* Bright white */
+            letter-spacing: 0.05rem;
+            /* A little spacing for readability */
         }
 
         p {
-            font-size: 1.1em;
-            line-height: 1.6;
-            margin-bottom: 30px;
+            font-size: 1.15rem;
+            /* Slightly larger paragraph text */
+            line-height: 1.7;
+            margin-bottom: 2.5rem;
+            /* 40px - more space before button */
+            color: #B0B0B0;
+            /* Slightly muted for contrast */
         }
 
         .docs-link {
             display: inline-block;
-            padding: 15px 30px;
-            background-color: #f0f8ff;
-            color: #4a0080;
+            padding: 1rem 2rem;
+            /* 16px 32px */
+            background-color: #5A128C;
+            /* Richer purple */
+            color: #F0F8FF;
+            /* White text */
             text-decoration: none;
             font-weight: 600;
-            border-radius: 8px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 0.5rem;
+            /* 8px */
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.4);
+            /* Enhanced shadow */
         }
 
         .docs-link:hover {
-            background-color: #e0e8f0;
-            transform: translateY(-2px);
+            background-color: #7B3FE3;
+            /* Brighter purple on hover */
+            transform: translateY(-0.1875rem) scale(1.02);
+            /* -3px */
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
+            /* More prominent shadow */
         }
     </style>
 </head>
 
 <body>
-    <div class=" content-container">
-        <img src="https://m3jz13d05b.ufs.sh/f/dLgmbGNJLXerMjDNawBovlI3sdb2nkrUQc6OBfxYZGS19XE7"
-            alt="Beerus the Destroyer">
-
+    <main>
         <h1>Hakai API</h1>
-        <p>A REST API serving anime metadata.</p>
-
-        <a href="https://github.com/middlegear/documentation" class="docs-link">API Documentation</a>
-    </div>
+        <p>Discover anime. Explore, integrate, and build.</p>
+        <a href="https://github.com/middlegear/documentation" class="docs-link">Discover the API</a>
+    </main>
 </body>
 
 </html>

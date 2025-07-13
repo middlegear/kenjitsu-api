@@ -88,24 +88,24 @@ export function toZoroServers(input: string): ZoroServers {
 }
 
 //
-const AnimeProvider = {
+const AnimeProviderApi = {
   HiAnime: 'hianime',
-  Animekai: 'animekai',
+  // Animekai: 'animekai',
 } as const; // Ensures values are readonly
 
-type AnimeProvider = (typeof AnimeProvider)[keyof typeof AnimeProvider]; // Extracts type
+export type AnimeProviderApi = (typeof AnimeProviderApi)[keyof typeof AnimeProviderApi]; // Extracts type
 
-export function toProvider(input: string): AnimeProvider {
+export function toProvider(input: string): AnimeProviderApi {
   if (!input) {
-    return AnimeProvider.HiAnime;
+    return AnimeProviderApi.HiAnime;
   }
 
   const normalizedInput = input.toLowerCase().trim();
 
-  if (Object.values(AnimeProvider).some(provider => provider === normalizedInput)) {
-    return normalizedInput as AnimeProvider;
+  if (Object.values(AnimeProviderApi).some(provider => provider === normalizedInput)) {
+    return normalizedInput as AnimeProviderApi;
   }
 
-  const validAnimeProvider = Object.values(AnimeProvider).join(' or ');
+  const validAnimeProvider = Object.values(AnimeProviderApi).join(' or ');
   throw new Error(`Invalid input: ${input}. Required inputs are: ${validAnimeProvider}`);
 }

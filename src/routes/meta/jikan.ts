@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { AnimeProvider, Format, Jikan, Seasons } from 'hakai-extensions';
+import { Format, Jikan, Seasons } from 'hakai-extensions';
 import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
 import { FastifyQuery, FastifyParams, AnilistInfo, AnilistRepetitive } from '../../utils/types.js';
-import { toProvider } from '../../utils/normalize.js';
+import { AnimeProviderApi, toProvider } from '../../utils/normalize.js';
 
 const jikan = new Jikan();
 
@@ -561,13 +561,13 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
       const malId = Number(request.params.malId);
       const provider = request.query.provider || 'hianime';
-      const newprovider = toProvider(provider) as AnimeProvider;
+      const newprovider = toProvider(provider) as AnimeProviderApi;
 
       const result = await jikan.fetchProviderAnimeId(malId, newprovider);
 
       let timecached: number;
       const status = result.data?.status.toLowerCase().trim();
-      status === 'finished airing' ? (timecached = 148) : (timecached = 12);
+      status === 'finished airing' ? (timecached = 148) : (timecached = 24);
 
       reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`);
 
@@ -610,13 +610,13 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       const malId = Number(request.params.malId);
       const provider = request.query.provider || 'hianime';
 
-      const newprovider = toProvider(provider) as AnimeProvider;
+      const newprovider = toProvider(provider) as AnimeProviderApi;
 
       const result = await jikan.fetchAnimeProviderEpisodes(malId, newprovider);
 
       let timecached: number;
       const status = result.data?.status.toLowerCase().trim();
-      status === 'finished airing' ? (timecached = 24) : (timecached = 1);
+      status === 'finished airing' ? (timecached = 148) : (timecached = 1);
       reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`);
 
       const cacheKey = `jikan-provider-episodes-${malId}-${newprovider}`;

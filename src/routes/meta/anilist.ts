@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { Anilist, AnimeProvider } from 'hakai-extensions';
-import { toAnilistSeasons, toFormatAnilist, toProvider } from '../../utils/normalize.js';
+import { Anilist } from 'hakai-extensions';
+import { AnimeProviderApi, toAnilistSeasons, toFormatAnilist, toProvider } from '../../utils/normalize.js';
 import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
 import { AnilistInfo, AnilistRepetitive, FastifyParams, FastifyQuery } from '../../utils/types.js';
 
@@ -456,7 +456,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
       reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
-      const newprovider = toProvider(provider) as AnimeProvider;
+      const newprovider = toProvider(provider) as AnimeProviderApi;
 
       const result = await anilist.fetchProviderAnimeId(anilistId, newprovider);
       if ('error' in result) {
@@ -504,8 +504,8 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
       let timecached: number;
       const status = result.data?.status.toLowerCase().trim();
-      status === 'finished' ? (timecached = 24) : (timecached = 1);
-      ////these cache headers work as long as the function isnt executed
+      status === 'finished' ? (timecached = 148) : (timecached = 24);
+
       reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`);
 
       const cacheKey = `anilist-provider-episodes-${anilistId}-${newprovider}`;
