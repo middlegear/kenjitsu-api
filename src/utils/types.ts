@@ -10,6 +10,7 @@ export interface FastifyParams {
 }
 export interface FastifyQuery {
   q?: string;
+  type?: string;
   page?: string;
   perPage?: string;
   format?: string;

@@ -109,3 +109,9 @@ export function toProvider(input: string): AnimeProviderApi {
   const validAnimeProvider = Object.values(AnimeProviderApi).join(' or ');
   throw new Error(`Invalid input: ${input}. Required inputs are: ${validAnimeProvider}`);
 }
+
+const SearchType = {
+  Movie: 'movie',
+  TvShow: 'tv',
+} as const;
+export type SearchType = (typeof SearchType)[keyof typeof SearchType];

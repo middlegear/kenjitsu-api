@@ -112,8 +112,8 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
       if ('error' in result) {
         return reply.status(500).send({
           error: result.error,
-          headers: result.headers, // Consider if you want to expose internal headers on error
-          data: result.data, // Consider if you want to expose internal data on error
+          headers: result.headers,
+          data: result.data,
         });
       }
       return reply.status(200).send({ headers: result.headers, data: result.data });

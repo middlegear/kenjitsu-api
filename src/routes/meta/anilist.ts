@@ -198,7 +198,6 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // api/anilist/top-anime?format=string&page=number&perPage=number
   fastify.get('/top-anime', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     const format = request.query.format || 'TV';
     const page = Number(request.query.page) || 1;
@@ -258,7 +257,6 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // api/anilist/upcoming?page=number&perPage=number
   fastify.get('/upcoming', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     const page = Number(request.query.page) || 1;
     let perPage = Number(request.query.perPage) || 20;
@@ -315,7 +313,6 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // api/anilist/characters/:anilistId
   fastify.get('/characters/:anilistId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     const anilistId = Number(request.params.anilistId);
 
@@ -333,7 +330,6 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // api/anilist/trending?page=number&perPage=number
   fastify.get('/trending', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     const page = Number(request.query.page) || 1;
     let perPage = Number(request.query.perPage) || 20;
@@ -390,7 +386,6 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // api/anilist/related/:anilistId
   fastify.get('/related/:anilistId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     const anilistId = Number(request.params.anilistId);
     reply.header('Cache-Control', `s-maxage=${96 * 60 * 60}, stale-while-revalidate=300`);
@@ -407,7 +402,6 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // api/anilist/seasons/:season/:year?format=string
   fastify.get(
     '/seasons/:season/:year',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
@@ -447,7 +441,6 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     },
   );
 
-  //api/anilist/get-provider/:anilistId?provider=string
   fastify.get(
     '/get-provider/:anilistId',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
@@ -491,7 +484,6 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     },
   );
 
-  //api/anilist/provider-episodes/:anilistId?provider=string
   fastify.get(
     '/provider-episodes/:anilistId',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {

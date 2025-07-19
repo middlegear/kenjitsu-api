@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { notFoundRateLimiter, ratelimitOptions, ratelimitPlugin } from './config/ratelimit.js';
 import Fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
-import StaticRoutes, { RouteNotFound } from './routes/static.js';
+import StaticRoutes from './routes/static.js';
 import AnimekaiRoutes from './routes/anime/animekai.js';
 import HianimeRoutes from './routes/anime/hianime.js';
 import AnilistRoutes from './routes/meta/anilist.js';
@@ -22,14 +22,7 @@ async function FastifyApp() {
 
   // Rate limiting
   await app.register(ratelimitPlugin, ratelimitOptions);
-
-  app.setNotFoundHandler(
-    {
-      preHandler: app.rateLimit(notFoundRateLimiter),
-    },
-    RouteNotFound,
-  );
-
+  await app.register(ratelimitPlugin, notFoundRateLimiter);
   app.register(AnilistRoutes, { prefix: '/api/anilist' });
   app.register(JikanRoutes, { prefix: '/api/jikan' });
   app.register(AnimekaiRoutes, { prefix: '/api/animekai' });
