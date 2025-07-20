@@ -1,9 +1,9 @@
 name: Dependency Update to trigger new deployment
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   repository_dispatch:
     types: [dependency-updated] 
 

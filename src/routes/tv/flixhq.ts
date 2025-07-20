@@ -1,6 +1,7 @@
 import { FlixHQ } from 'hakai-extensions';
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { FastifyParams, FastifyQuery } from '../../utils/types';
+import { toFlixServers } from '../../utils/normalize';
 
 const flixhq = new FlixHQ();
 
@@ -75,19 +76,23 @@ export async function FlixHQRoutes(fastify: FastifyInstance) {
     });
   });
 
-  fastify.get('/sources', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
-    const episodeId = String(request.params.episodeId);
+  fastify.get(
+    '/watch/:episodeId',
+    async (request: FastifyRequest<{ Params: FastifyParams; Querystring: FastifyQuery }>, reply: FastifyReply) => {
+      const episodeId = String(request.params.episodeId);
+      const server = request.query.server || 'vidcloud';
+      const validateServer = toFlixServers(server);
+      reply.header('Cache-Control', 's-maxage=300, stale-while-revalidate=180');
 
-    reply.header('Cache-Control', 's-maxage=300, stale-while-revalidate=180');
+      const results = await flixhq.fetchSources(episodeId, validateServer);
 
-    const results = await flixhq.fetchSources(episodeId);
-
-    if ('error' in results) {
-      return reply.status(500).send({ error: results.error, data: results.data });
-    }
-    return reply.send({
-      headers: results.headers,
-      data: results.data,
-    });
-  });
+      if ('error' in results) {
+        return reply.status(500).send({ error: results.error, data: results.data });
+      }
+      return reply.send({
+        headers: results.headers,
+        data: results.data,
+      });
+    },
+  );
 }

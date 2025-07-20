@@ -17,7 +17,6 @@ export function toFormatAnilist(input: string): Format {
 
   const upperCaseInput = input.toUpperCase().trim();
 
-  // Check if the normalized input is a valid Format
   if (Object.values(Format).includes(upperCaseInput as Format)) {
     return upperCaseInput as Format;
   }
@@ -110,8 +109,39 @@ export function toProvider(input: string): AnimeProviderApi {
   throw new Error(`Invalid input: ${input}. Required inputs are: ${validAnimeProvider}`);
 }
 
-const SearchType = {
+export const SearchType = {
   Movie: 'movie',
   TvShow: 'tv',
 } as const;
 export type SearchType = (typeof SearchType)[keyof typeof SearchType];
+export function toSearchType(input: string): SearchType {
+  const normalizedInput = input.toLowerCase().trim();
+
+  if (Object.values(SearchType).some(provider => provider === normalizedInput)) {
+    return normalizedInput as SearchType;
+  }
+
+  const validSearchType = Object.values(StreamingServers).join(' or ');
+  throw new Error(`Invalid input: ${input}. Required inputs are: ${validSearchType}`);
+}
+export const StreamingServers = {
+  Upcloud: 'upcloud',
+  VidCloud: 'vidcloud',
+  Akcloud: 'akcloud',
+} as const;
+export type StreamingServers = (typeof StreamingServers)[keyof typeof StreamingServers];
+
+export function toFlixServers(input: string): StreamingServers {
+  if (!input) {
+    return StreamingServers.VidCloud;
+  }
+
+  const normalizedInput = input.toLowerCase().trim();
+
+  if (Object.values(StreamingServers).some(provider => provider === normalizedInput)) {
+    return normalizedInput as StreamingServers;
+  }
+
+  const validServer = Object.values(StreamingServers).join(' or ');
+  throw new Error(`Invalid input: ${input}. Required inputs are: ${validServer}`);
+}
