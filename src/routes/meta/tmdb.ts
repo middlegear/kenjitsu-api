@@ -1,8 +1,8 @@
 import { TheMovieDatabase } from 'hakai-extensions';
-import { FastifyRequest, FastifyReply } from 'fastify';
-import { FastifyInstance } from 'fastify';
-import { FastifyQuery } from '../../utils/types';
-import { SearchType, toSearchType } from '../../utils/normalize';
+import type { FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance } from 'fastify';
+import type { FastifyQuery } from '../../utils/types.js';
+import { SearchType, toSearchType } from '../../utils/normalize.js';
 
 const tmdb = new TheMovieDatabase();
 

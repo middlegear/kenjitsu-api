@@ -1,8 +1,8 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { Anilist } from 'hakai-extensions';
-import { AnimeProviderApi, toAnilistSeasons, toFormatAnilist, toProvider } from '../../utils/normalize.js';
+import { toFormatAnilist, type AnimeProviderApi, toAnilistSeasons, toProvider } from '../../utils/normalize.js';
 import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
-import { AnilistInfo, AnilistRepetitive, FastifyParams, FastifyQuery } from '../../utils/types.js';
+import type { AnilistInfo, AnilistRepetitive, FastifyParams, FastifyQuery } from '../../utils/types.js';
 
 const anilist = new Anilist();
 

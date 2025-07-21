@@ -12,7 +12,6 @@ import { FlixHQRoutes } from './routes/tv/flixhq.js';
 const app = Fastify({ maxParamLength: 1000, logger: true });
 
 async function FastifyApp() {
-  //CORS
   await app.register(fastifyCors, {
     origin: '*',
     methods: 'GET',
@@ -23,6 +22,7 @@ async function FastifyApp() {
   // Rate limiting
   await app.register(ratelimitPlugin, ratelimitOptions);
   await app.register(ratelimitPlugin, notFoundRateLimiter);
+  //
   app.register(AnilistRoutes, { prefix: '/api/anilist' });
   app.register(JikanRoutes, { prefix: '/api/jikan' });
   app.register(AnimekaiRoutes, { prefix: '/api/animekai' });

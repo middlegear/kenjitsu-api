@@ -1,6 +1,6 @@
 import { AnimeKai } from 'hakai-extensions';
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { AnimekaiInfo, FastifyParams, FastifyQuery } from '../../utils/types.js';
+import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { AnimekaiInfo, FastifyParams, FastifyQuery } from '../../utils/types.js';
 import { toCategory } from '../../utils/normalize.js';
 import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
 

@@ -1,8 +1,8 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { Format, Jikan, Seasons } from 'hakai-extensions';
 import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
-import { FastifyQuery, FastifyParams, AnilistInfo, AnilistRepetitive } from '../../utils/types.js';
-import { AnimeProviderApi, toProvider } from '../../utils/normalize.js';
+import type { FastifyQuery, FastifyParams, AnilistInfo, AnilistRepetitive } from '../../utils/types.js';
+import { type AnimeProviderApi, toProvider } from '../../utils/normalize.js';
 
 const jikan = new Jikan();
 
