@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
-import fastifyCors from '@fastify/cors';
 import StaticRoutes from './routes/static.js';
 import AnimekaiRoutes from './routes/anime/animekai.js';
 import HianimeRoutes from './routes/anime/hianime.js';
@@ -8,22 +7,19 @@ import AnilistRoutes from './routes/meta/anilist.js';
 import JikanRoutes from './routes/meta/jikan.js';
 import FlixHQRoutes from './routes/tv/flixhq.js';
 import TheMovieDatabaseRoutes from './routes/meta/tmdb.js';
-import { ratelimitOptions, rateLimitPlugIn } from './config/ratelimit.js';
 import TvMazeRoutes from './routes/meta/tvmaze.js';
+import { ratelimitOptions, rateLimitPlugIn } from './config/ratelimit.js';
+import fastifyCors, { corsOptions } from './config/cors.js';
 
 const app = Fastify({ maxParamLength: 1000, logger: true });
 
 async function FastifyApp() {
   app.register(rateLimitPlugIn, ratelimitOptions);
-
   app.setNotFoundHandler(function (request: FastifyRequest, reply: FastifyReply) {
     reply.code(404).send({ message: 'Stop go read', url: 'https://hakai-documentation.vercel.app' });
   });
 
-  await app.register(fastifyCors, {
-    origin: '*',
-    methods: 'GET',
-  });
+  await app.register(fastifyCors, corsOptions);
 
   await app.register(StaticRoutes);
   await app.register(AnilistRoutes, { prefix: '/api/anilist' });
