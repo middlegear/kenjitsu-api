@@ -1,9 +1,6 @@
 
-<h1 align="center">Hakai API</h1>  
-<p align = "center">A RESTful api serving anime, tv and movies metadata.</p>
-
 > **Disclaimer:**  
-> This package is **unofficial** and is **not affiliated** with Anilist, Jikan, or any third-party providers. It does not host, own, or distribute any content. All data belongs to its respective owners.  
+> This API is **unofficial** and is **not affiliated** with Anilist, Jikan, or any third-party providers. It does not host, own, or distribute any content. All data belongs to its respective owners.  
 
 
 
@@ -12,15 +9,8 @@
 ## **Installation**  
 
   
-Before using Hakai API, ensure you have **Node.js** installed. You can download it from:  
-➡ [Node.js Official Website](https://nodejs.org/)
+Before using Hakai API, ensure you have **Node.js** installed.  
 
-To verify installation:  
-```sh
-node -v
-```
-
-This should output the installed Node.js version.
 
 ### **Clone the Repository**  
 ```sh
@@ -68,6 +58,10 @@ REDIS_PASSWORD =
 # Allowed origins (default to allow all)
 ALLOWED_ORIGINS = *
 
+# ========================
+# Disable vercel build cache
+# ==========================
+VERCEL_FORCE_NO_BUILD_CACHE = 1
 ```
 
 ### **Start the Server**  
