@@ -2,7 +2,7 @@ import { TheMovieDatabase } from 'hakai-extensions';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import type { FastifyInstance } from 'fastify';
 import type { FastifyParams, FastifyQuery } from '../../utils/types.js';
-import { SearchType, toEmbedServers, toSearchType, toTimeWindow } from '../../utils/utils.js';
+import { EmbedServers, SearchType, toEmbedServers, toSearchType, toTimeWindow } from '../../utils/utils.js';
 
 const tmdb = new TheMovieDatabase();
 
@@ -354,12 +354,12 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
     '/watch-movie/:tmdbId',
     async (request: FastifyRequest<{ Params: FastifyParams; Querystring: FastifyQuery }>, reply: FastifyReply) => {
       const tmdbId = Number(request.params.tmdbId);
-      const server = request.query.server || '2embed';
-      const StreamingServers = toEmbedServers(server);
+      const server = request.query.server as EmbedServers;
+      // const StreamingServers = toEmbedServers(server);
 
-      reply.header('Cache-Control', 's-maxage=300, stale-while-revalidate=60');
+      // reply.header('Cache-Control', 's-maxage=300, stale-while-revalidate=60');
 
-      const result = await tmdb.fetchMovieSources(tmdbId, StreamingServers);
+      const result = await tmdb.fetchMovieSources(tmdbId, server);
       if ('error' in result) {
         return reply.status(500).send({
           data: result.data,
