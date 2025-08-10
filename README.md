@@ -2,15 +2,7 @@
 > **Disclaimer:**  
 > This API is **unofficial** and is **not affiliated** with Anilist, Jikan, or any third-party providers. It does not host, own, or distribute any content. All data belongs to its respective owners.  
 
-
-
 ---
-
-## **Installation**  
-
-  
-Before using Hakai API, ensure you have **Node.js** installed.  
-
 
 ### **Clone the Repository**  
 ```sh
@@ -30,8 +22,8 @@ Create a `.env` file in the root directory:
 # ========================
 # Server Configuration
 # ========================
-PORT = 3000  # Default port
-HOSTNAME = 0.0.0.0  # Use 0.0.0.0 for deployed environments
+PORT = 3000 
+HOSTNAME = 0.0.0.0
 
 # ========================
 # Rate Limiting

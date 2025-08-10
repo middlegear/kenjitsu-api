@@ -35,11 +35,11 @@ async function FastifyApp() {
   await app.register(HianimeRoutes, { prefix: '/api/hianime' });
   await app.register(FlixHQRoutes, { prefix: '/api/flixhq' });
   await app.register(TvMazeRoutes, { prefix: '/api/tvmaze' });
-  await app.register(TheMovieDatabaseRoutes, { prefix: 'api/tmdb' });
+  await app.register(TheMovieDatabaseRoutes, { prefix: '/api/tmdb' });
 
   try {
     const port = parseInt(process.env.PORT || '3000', 10);
-    const host = process.env.HOSTNAME || '0.0.0.0';
+    const host = process.env.HOST || '0.0.0.0';
 
     if (isNaN(port)) {
       console.error('Invalid PORT environment variable');
