@@ -22,7 +22,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     let perPage = Number(request.query.perPage) || 20;
     perPage = Math.min(perPage, 50);
 
-    reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
+    reply.header('Cache-Control', `s-maxage=${48 * 60 * 60}, stale-while-revalidate=300`);
 
     const result = await anilist.search(q, page, perPage);
     if ('error' in result) {
@@ -49,9 +49,16 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
   fastify.get('/info/:anilistId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     const anilistId = Number(request.params.anilistId);
 
-    const cacheKey = `anilist-info-${anilistId}`;
+    reply.header('Cache-Control', `s-maxage=${48 * 60 * 60}, stale-while-revalidate=300`);
 
-    reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
+    const cacheKey = `anilist-info-${anilistId}`;
+    const cachedData = (await redisGetCache(cacheKey)) as AnilistInfo;
+
+    if (cachedData) {
+      return reply.status(200).send({
+        data: cachedData.data,
+      });
+    }
 
     const result = await anilist.fetchInfo(anilistId);
 
@@ -59,14 +66,6 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({
         data: result.data,
         error: result.error,
-      });
-    }
-
-    const cachedData = (await redisGetCache(cacheKey)) as AnilistInfo;
-
-    if (cachedData) {
-      return reply.status(200).send({
-        data: cachedData.data,
       });
     }
 
@@ -205,7 +204,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
     const newformat = toFormatAnilist(format);
 
-    reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
+    reply.header('Cache-Control', `s-maxage=${48 * 60 * 60}, stale-while-revalidate=300`);
 
     const cacheKey = `anilist-top-anime-${page}-${perPage}-${newformat}`;
     const cachedData = (await redisGetCache(cacheKey)) as AnilistRepetitive;
@@ -263,7 +262,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
     const cacheKey = `anilist-upcoming-${page}-${perPage}`;
 
-    reply.header('Cache-Control', `s-maxage=${12 * 60 * 60}, stale-while-revalidate=300`);
+    reply.header('Cache-Control', `s-maxage=${48 * 60 * 60}, stale-while-revalidate=300`);
 
     const cachedData = (await redisGetCache(cacheKey)) as AnilistRepetitive;
     if (cachedData) {
@@ -450,14 +449,6 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
       const newprovider = toProvider(provider) as AnimeProviderApi;
 
-      const result = await anilist.fetchProviderAnimeId(anilistId, newprovider);
-      if ('error' in result) {
-        return reply.status(500).send({
-          data: result.data,
-          animeProvider: result.animeProvider,
-          error: result.error,
-        });
-      }
       const cacheKey = `anilist-provider-id-${anilistId}-${newprovider}`;
 
       const cachedData = (await redisGetCache(cacheKey)) as AnilistInfo;
@@ -467,6 +458,15 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
           animeProvider: cachedData.animeProvider,
         });
       }
+      const result = await anilist.fetchProviderAnimeId(anilistId, newprovider);
+      if ('error' in result) {
+        return reply.status(500).send({
+          data: result.data,
+          animeProvider: result.animeProvider,
+          error: result.error,
+        });
+      }
+
       if (result.data !== null && result.animeProvider !== null) {
         const cacheableData = {
           data: result.data,
@@ -488,16 +488,9 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
       const anilistId = Number(request.params.anilistId);
       const provider = request.query.provider || 'hianime';
-
       const newprovider = toProvider(provider);
 
-      const result = await anilist.fetchAnimeProviderEpisodes(anilistId, newprovider);
-
-      let timecached: number;
-      const status = result.data?.status.toLowerCase().trim();
-      status === 'finished' ? (timecached = 148) : (timecached = 24);
-
-      reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`);
+      reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
       const cacheKey = `anilist-provider-episodes-${anilistId}-${newprovider}`;
 
@@ -508,6 +501,9 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
           providerEpisodes: cachedData.providerEpisodes,
         });
       }
+
+      const result = await anilist.fetchAnimeProviderEpisodes(anilistId, newprovider);
+
       if ('error' in result) {
         return reply.status(500).send({
           data: result.data,
@@ -516,6 +512,10 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
         });
       }
 
+      let timecached: number;
+      const status = result.data?.status.toLowerCase().trim();
+      status === 'finished' ? (timecached = 148) : (timecached = 24);
+
       if (result.data !== null && result.providerEpisodes.length > 0) {
         const cacheableData = {
           data: result.data,
@@ -523,6 +523,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
         };
         await redisSetCache(cacheKey, cacheableData, timecached);
       }
+
       return reply.status(200).send({
         data: result.data,
         providerEpisodes: result.providerEpisodes,
