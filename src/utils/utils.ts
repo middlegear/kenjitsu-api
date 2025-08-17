@@ -63,7 +63,7 @@ export function toCategory(input: string): SubOrDub {
     return lowerCaseInput as SubOrDub;
   }
 
-  throw new Error(`Invalid input: ${input}. Required inputs are: ${validInputs}`);
+  throw new Error(`Invalid input: ${input}. Required category inputs are: ${validInputs}`);
 }
 
 const ZoroServers = {
@@ -82,7 +82,7 @@ export function toZoroServers(input: string): ZoroServers {
     return lowerCaseInput as ZoroServers;
   }
   const validInputs = Object.values(ZoroServers).join(' or ');
-  throw new Error(`Invalid input: ${input}. Required inputs are: ${validInputs}`);
+  throw new Error(`Invalid input: ${input}. Required server inputs are: ${validInputs}`);
 }
 
 //
@@ -105,7 +105,7 @@ export function toProvider(input: string): AnimeProviderApi {
   }
 
   const validAnimeProvider = Object.values(AnimeProviderApi).join(' or ');
-  throw new Error(`Invalid input: ${input}. Required inputs are: ${validAnimeProvider}`);
+  throw new Error(`Invalid input: ${input}. Required provider inputs are: ${validAnimeProvider}`);
 }
 
 export const SearchType = {
@@ -121,7 +121,7 @@ export function toSearchType(input: string): SearchType {
   }
 
   const validSearchType = Object.values(SearchType).join(' or ');
-  throw new Error(`Invalid input: ${input}. Required input values are: ${validSearchType}`);
+  throw new Error(`Invalid input: ${input}. Required input types are: ${validSearchType}`);
 }
 export const StreamingServers = {
   Upcloud: 'upcloud',
@@ -162,7 +162,7 @@ export function toTimeWindow(input: string): timeWindow {
   }
 
   const validWindow = Object.values(timeWindow).join(' or ');
-  throw new Error(`Invalid input: ${input}. Required inputs are: ${validWindow}`);
+  throw new Error(`Invalid input: ${input}. Required timeWindow inputs are: ${validWindow}`);
 }
 
 // export const EmbedServers = {

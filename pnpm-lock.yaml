@@ -24,8 +24,8 @@ importers:
         specifier: ^5.4.0
         version: 5.4.0
       hakai-extensions:
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: git+https://github.com/middlegear/hakai-extensions.git#main
+        version: git+https://github.com/middlegear/hakai-extensions.git#b09b523e8de3df590cc427b02bced420fefbded5
       ioredis:
         specifier: ^5.7.0
         version: 5.7.0
@@ -780,8 +780,9 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
-  hakai-extensions@1.2.0:
-    resolution: {integrity: sha512-Nj5rvTDJQC0EuZGmUZRZPDnS0vqVKbRS2Wz1NlEAXZUyvX0j6c7ym/l/RxYT4fvcL8F7j4SRHFjMn7q2/0QkWQ==}
+  hakai-extensions@git+https://github.com/middlegear/hakai-extensions.git#b09b523e8de3df590cc427b02bced420fefbded5:
+    resolution: {commit: b09b523e8de3df590cc427b02bced420fefbded5, repo: https://github.com/middlegear/hakai-extensions.git, type: git}
+    version: 0.0.0-development
 
   has-flag@3.0.0:
     resolution: {integrity: sha512-sKJf1+ceQBr4SMkvQnBDNDtf4TXpVhVGateu0t918bl30FnbE2m4vNLX+VWe/dpjlb+HugGYzW7uQXH98HPEYw==}
@@ -2173,7 +2174,7 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
-  hakai-extensions@1.2.0:
+  hakai-extensions@git+https://github.com/middlegear/hakai-extensions.git#b09b523e8de3df590cc427b02bced420fefbded5:
     dependencies:
       cheerio: 1.1.2
       undici: 7.13.0

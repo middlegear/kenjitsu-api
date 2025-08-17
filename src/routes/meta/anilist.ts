@@ -1,10 +1,18 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { Anilist } from 'hakai-extensions';
-import { toFormatAnilist, type AnimeProviderApi, toAnilistSeasons, toProvider } from '../../utils/utils.js';
+import { Anilist, HiAnime } from 'hakai-extensions';
+import {
+  toFormatAnilist,
+  type AnimeProviderApi,
+  toAnilistSeasons,
+  toProvider,
+  toCategory,
+  toZoroServers,
+} from '../../utils/utils.js';
 import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
 import type { AnilistInfo, AnilistRepetitive, FastifyParams, FastifyQuery } from '../../utils/types.js';
 
 const anilist = new Anilist();
+const zoro = new HiAnime();
 
 export default async function AnilistRoutes(fastify: FastifyInstance) {
   fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -528,6 +536,31 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
         data: result.data,
         providerEpisodes: result.providerEpisodes,
       });
+    },
+  );
+
+  fastify.get(
+    '/watch/:episodeId',
+    async (request: FastifyRequest<{ Params: FastifyParams; Querystring: FastifyQuery }>, reply: FastifyReply) => {
+      const episodeId = String(request.params.episodeId);
+      const category = request.query.category || 'sub';
+      const server = request.query.server || 'hd-2';
+
+      const newserver = toZoroServers(server);
+      const newcategory = toCategory(category);
+
+      reply.header('Cache-Control', 's-maxage=420, stale-while-revalidate=60');
+
+      const result = await zoro.fetchSources(episodeId, newserver, newcategory);
+
+      if ('error' in result) {
+        return reply.status(500).send({
+          error: result.error,
+          headers: result.headers,
+          data: result.data,
+        });
+      }
+      return reply.status(200).send({ headers: result.headers, data: result.data });
     },
   );
 }
