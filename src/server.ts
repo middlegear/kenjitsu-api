@@ -47,8 +47,6 @@ async function FastifyApp() {
     }
 
     await app.listen({ host, port });
-
-    console.log(`✅  Server is running at : http://localhost:${port}`);
   } catch (err) {
     console.error(`Server startup error:`, err);
     process.exit(1);
