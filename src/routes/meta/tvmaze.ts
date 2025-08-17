@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import { TvMaze } from 'hakai-extensions';
+import { TvMaze } from '@middlegear/hakai-extensions';
 import type { FastifyParams, FastifyQuery } from '../../utils/types.js';
 
 const tvmaze = new TvMaze();

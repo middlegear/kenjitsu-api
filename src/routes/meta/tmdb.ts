@@ -1,4 +1,4 @@
-import { TheMovieDatabase } from 'hakai-extensions';
+import { TheMovieDatabase } from '@middlegear/hakai-extensions';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import type { FastifyInstance } from 'fastify';
 import type { FastifyParams, FastifyQuery } from '../../utils/types.js';

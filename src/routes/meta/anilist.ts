@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { Anilist, HiAnime } from 'hakai-extensions';
+import { Anilist, HiAnime } from '@middlegear/hakai-extensions';
 import {
   toFormatAnilist,
   type AnimeProviderApi,

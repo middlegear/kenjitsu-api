@@ -1,4 +1,4 @@
-import { FlixHQ } from 'hakai-extensions';
+import { FlixHQ } from '@middlegear/hakai-extensions';
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import type { FastifyParams, FastifyQuery } from '../../utils/types.js';
 import { toFlixServers } from '../../utils/utils.js';

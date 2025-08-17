@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { HiAnime } from 'hakai-extensions';
+import { HiAnime } from '@middlegear/hakai-extensions';
 import { toZoroServers, toCategory } from '../../utils/utils.js';
 import type { FastifyParams, FastifyQuery } from '../../utils/types.js';
 

@@ -1,4 +1,4 @@
-import { AnimeKai } from 'hakai-extensions';
+import { AnimeKai } from '@middlegear/hakai-extensions';
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import type { AnimekaiInfo, FastifyParams, FastifyQuery } from '../../utils/types.js';
 import { toCategory } from '../../utils/utils.js';
