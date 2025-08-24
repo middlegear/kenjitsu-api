@@ -33,7 +33,7 @@ async function FastifyApp() {
   await app.register(JikanRoutes, { prefix: '/api/jikan' });
   await app.register(AnimekaiRoutes, { prefix: '/api/animekai' });
   await app.register(HianimeRoutes, { prefix: '/api/hianime' });
-  // await app.register(FlixHQRoutes, { prefix: '/api/flixhq' });
+  await app.register(FlixHQRoutes, { prefix: '/api/flixhq' });
   await app.register(TvMazeRoutes, { prefix: '/api/tvmaze' });
   await app.register(TheMovieDatabaseRoutes, { prefix: '/api/tmdb' });
 
