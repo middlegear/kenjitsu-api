@@ -6,6 +6,8 @@ export interface FastifyParams {
   episodeId?: string;
   mediaId?: string;
   tvmazeId?: number;
+  sort?: string;
+  genre?: string;
 }
 export interface FastifyQuery {
   imdbId?: number;

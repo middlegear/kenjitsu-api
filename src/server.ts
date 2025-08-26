@@ -2,7 +2,7 @@ import 'dotenv/config';
 import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
 
 import StaticRoutes from './routes/static.js';
-import AnimekaiRoutes from './routes/anime/animekai.js';
+// import AnimekaiRoutes from './routes/anime/animekai.js';
 import HianimeRoutes from './routes/anime/hianime.js';
 import AnilistRoutes from './routes/meta/anilist.js';
 import JikanRoutes from './routes/meta/jikan.js';
@@ -31,7 +31,7 @@ async function FastifyApp() {
   await app.register(StaticRoutes);
   await app.register(AnilistRoutes, { prefix: '/api/anilist' });
   await app.register(JikanRoutes, { prefix: '/api/jikan' });
-  await app.register(AnimekaiRoutes, { prefix: '/api/animekai' });
+  // await app.register(AnimekaiRoutes, { prefix: '/api/animekai' });
   await app.register(HianimeRoutes, { prefix: '/api/hianime' });
   await app.register(FlixHQRoutes, { prefix: '/api/flixhq' });
   await app.register(TvMazeRoutes, { prefix: '/api/tvmaze' });

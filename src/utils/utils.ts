@@ -185,3 +185,59 @@ export function toTimeWindow(input: string): timeWindow {
 //   const validServer = Object.values(EmbedServers).join(' or ');
 //   throw new Error(`Invalid input: ${input}. Required inputs are: ${validServer}`);
 // }
+
+export const HIGenres = [
+  'action',
+  'adventure',
+  'cars',
+  'comedy',
+  'dementia',
+  'demons',
+  'drama',
+  'ecchi',
+  'fantasy',
+  'game',
+  'harem',
+  'historical',
+  'horror',
+  'isekai',
+  'josei',
+  'kids',
+  'magic',
+  'martial-arts',
+  'mecha',
+  'military',
+  'music',
+  'mystery',
+  'parody',
+  'police',
+  'psychological',
+  'romance',
+  'samurai',
+  'school',
+  'sci-fi',
+  'seinen',
+  'shoujo',
+  'shoujo-ai',
+  'shounen',
+  'shounen-ai',
+  'slice-of-life',
+  'space',
+  'sports',
+  'super-power',
+  'supernatural',
+  'thriller',
+  'vampire',
+] as const;
+
+export type HIGenres = (typeof HIGenres)[number];
+export function toHIGenres(input: string): HIGenres {
+  const normalizedInput = input.toLowerCase().trim();
+
+  if (Object.values(HIGenres).some(provider => provider === normalizedInput)) {
+    return normalizedInput as HIGenres;
+  }
+
+  const validInput = Object.values(HIGenres).join(' or ');
+  throw new Error(`Invalid input: ${input}. Required genre inputs are: ${validInput}`);
+}

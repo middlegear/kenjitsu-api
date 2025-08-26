@@ -1,103 +1,384 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { HiAnime } from '@middlegear/hakai-extensions';
-import { toZoroServers, toCategory } from '../../utils/utils.js';
+import { toZoroServers, toCategory, toHIGenres } from '../../utils/utils.js';
 import type { FastifyParams, FastifyQuery } from '../../utils/types.js';
 
 const zoro = new HiAnime();
 
 export default async function HianimeRoutes(fastify: FastifyInstance) {
-  // fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
-  //   return reply.send({
-  //     message: 'Welcome to Hianime Provider',
-  //   });
-  // });
+  fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
+    return reply.send({
+      message: 'Welcome to Hianime Provider',
+    });
+  });
 
-  // fastify.get('/search', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
-  //   let q = request.query.q?.trim() ?? '';
-  //   q = decodeURIComponent(q);
-  //   q = q.replace(/[^\w\s\-_.]/g, '');
+  fastify.get('/search', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
+    let q = request.query.q?.trim() ?? '';
+    q = decodeURIComponent(q);
+    q = q.replace(/[^\w\s\-_.]/g, '');
 
-  //   if (!q.length) {
-  //     return reply.status(400).send({ error: 'Query string cannot be empty' });
-  //   }
-  //   if (q.length > 100) {
-  //     return reply.status(400).send({ error: 'Query too long' });
-  //   }
+    if (!q.length) {
+      return reply.status(400).send({ error: 'Query string cannot be empty' });
+    }
+    if (q.length > 100) {
+      return reply.status(400).send({ error: 'Query too long' });
+    }
 
-  //   const page = Number(request.query.page) || 1;
+    const page = Number(request.query.page) || 1;
 
-  //   reply.header('Cache-Control', 's-maxage=86400, stale-while-revalidate=300');
+    reply.header('Cache-Control', 's-maxage=86400, stale-while-revalidate=300');
 
-  //   const result = await zoro.search(q, page);
-  //   if ('error' in result) {
-  //     return reply.status(500).send({
-  //       error: result.error,
-  //       data: result.data,
-  //       hasNextPage: result.hasNextPage,
-  //       currentPage: result.currentPage,
-  //       lastPage: result.lastPage,
-  //     });
-  //   }
-  //   return reply.status(200).send({
-  //     hasNextPage: result.hasNextPage,
-  //     currentPage: result.currentPage,
-  //     lastPage: result.lastPage,
-  //     data: result.data,
-  //   });
-  // });
+    const result = await zoro.search(q, page);
+    if ('error' in result) {
+      return reply.status(500).send({
+        hasNextPage: result.hasNextPage,
+        currentPage: result.currentPage,
+        lastPage: result.lastPage,
+        data: result.data,
+        error: result.error,
+      });
+    }
+    return reply.status(200).send({
+      hasNextPage: result.hasNextPage,
+      currentPage: result.currentPage,
+      lastPage: result.lastPage,
+      data: result.data,
+    });
+  });
 
-  // fastify.get('/info/:animeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
-  //   const animeId = String(request.params.animeId);
+  fastify.get('/suggestions', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
+    let q = request.query.q?.trim() ?? '';
+    q = decodeURIComponent(q);
+    q = q.replace(/[^\w\s\-_.]/g, '');
 
-  //   reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+    if (!q.length) {
+      return reply.status(400).send({ error: 'Query string cannot be empty' });
+    }
+    if (q.length > 100) {
+      return reply.status(400).send({ error: 'Query too long' });
+    }
 
-  //   const result = await zoro.fetchInfo(animeId);
-  //   if ('error' in result) {
-  //     return reply.status(500).send({
-  //       error: result.error,
-  //       data: result.data,
-  //     });
-  //   }
-  //   return reply.status(200).send({
-  //     data: result.data,
-  //   });
-  // });
+    reply.header('Cache-Control', 's-maxage=86400, stale-while-revalidate=300');
 
-  // fastify.get('/episodes/:animeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
-  //   const animeId = String(request.params.animeId);
+    const result = await zoro.searchSuggestions(q);
+    if ('error' in result) {
+      return reply.status(500).send({
+        error: result.error,
+        data: result.data,
+      });
+    }
+    return reply.status(200).send({
+      data: result.data,
+    });
+  });
 
-  //   reply.header('Cache-Control', 's-maxage=7200, stale-while-revalidate=300');
+  fastify.get('/info/:animeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
+    const animeId = String(request.params.animeId);
 
-  //   const result = await zoro.fetchEpisodes(animeId);
+    reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
 
-  //   if ('error' in result) {
-  //     return reply.status(500).send({
-  //       error: result.error,
-  //       data: result.data,
-  //     });
-  //   }
-  //   return reply.status(200).send({
-  //     data: result.data,
-  //   });
-  // });
+    const result = await zoro.fetchAnimeInfo(animeId);
+    if ('error' in result) {
+      return reply.status(500).send({
+        error: result.error,
+        data: result.data,
+        relatedSeasons: result.relatedSeasons,
+        recommendedAnime: result.recommendedAnime,
+        mostPopular: result.mostPopular,
+        promotionVideos: result.promotionVideos,
+        relatedAnime: result.relatedAnime,
+        characters: result.characters,
+      });
+    }
+    return reply.status(200).send({
+      data: result.data,
+      relatedSeasons: result.relatedSeasons,
+      recommendedAnime: result.recommendedAnime,
+      mostPopular: result.mostPopular,
+      promotionVideos: result.promotionVideos,
+      relatedAnime: result.relatedAnime,
+      characters: result.characters,
+    });
+  });
 
-  // fastify.get('/servers/:episodeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
-  //   const episodeId = String(request.params.episodeId);
+  fastify.get('/home', async (request: FastifyRequest, reply: FastifyReply) => {
+    reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
 
-  //   reply.header('Cache-Control', 's-maxage=3600, stale-while-revalidate=300');
+    const result = await zoro.fetchHome();
+    if ('error' in result) {
+      return reply.status(500).send({
+        error: result.error,
+        data: result.data,
+        trending: result.trending,
+        topAnime: result.topAnime,
+        topAiring: result.topAiring,
+        mostPopular: result.mostPopular,
+        favourites: result.favourites,
+        recentlyCompleted: result.recentlyCompleted,
+        recentlyAdded: result.recentlyAdded,
+        recentlyUpdated: result.recentlyUpdated,
+      });
+    }
+    return reply.status(200).send({
+      data: result.data,
+      trending: result.trending,
+      topAnime: result.topAnime,
+      topAiring: result.topAiring,
+      mostPopular: result.mostPopular,
+      favourites: result.favourites,
+      recentlyCompleted: result.recentlyCompleted,
+      recentlyAdded: result.recentlyAdded,
+      recentlyUpdated: result.recentlyUpdated,
+    });
+  });
 
-  //   const result = await zoro.fetchEpisodeServers(episodeId);
+  fastify.get('/top-airing', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
+    reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
 
-  //   if ('error' in result) {
-  //     return reply.status(500).send({
-  //       error: result.error,
-  //       data: result.data,
-  //     });
-  //   }
-  //   return reply.status(200).send({
-  //     data: result.data,
-  //   });
-  // });
+    const page = Number(request.query.page) || 1;
+
+    const result = await zoro.fetchTopAiring(page);
+    if ('error' in result) {
+      return reply.status(500).send({
+        hasNextPage: result.hasNextPage,
+        currentPage: result.currentPage,
+        lastPage: result.lastPage,
+        error: result.error,
+        data: result.data,
+        topAnime: result.topAnime,
+      });
+    }
+    return reply.status(200).send({
+      hasNextPage: result.hasNextPage,
+      currentPage: result.currentPage,
+      lastPage: result.lastPage,
+      error: result.error,
+      data: result.data,
+      topAnime: result.topAnime,
+    });
+  });
+
+  fastify.get('/favourites', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
+    reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+
+    const page = Number(request.query.page) || 1;
+
+    const result = await zoro.fetchMostFavourites(page);
+    if ('error' in result) {
+      return reply.status(500).send({
+        hasNextPage: result.hasNextPage,
+        currentPage: result.currentPage,
+        lastPage: result.lastPage,
+        error: result.error,
+        data: result.data,
+        topAnime: result.topAnime,
+      });
+    }
+    return reply.status(200).send({
+      hasNextPage: result.hasNextPage,
+      currentPage: result.currentPage,
+      lastPage: result.lastPage,
+      error: result.error,
+      data: result.data,
+      topAnime: result.topAnime,
+    });
+  });
+
+  fastify.get('/most-popular', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
+    reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+
+    const page = Number(request.query.page) || 1;
+
+    const result = await zoro.fetchMostPopular(page);
+    if ('error' in result) {
+      return reply.status(500).send({
+        hasNextPage: result.hasNextPage,
+        currentPage: result.currentPage,
+        lastPage: result.lastPage,
+        error: result.error,
+        data: result.data,
+        topAnime: result.topAnime,
+      });
+    }
+    return reply.status(200).send({
+      hasNextPage: result.hasNextPage,
+      currentPage: result.currentPage,
+      lastPage: result.lastPage,
+      error: result.error,
+      data: result.data,
+      topAnime: result.topAnime,
+    });
+  });
+
+  fastify.get('/recently-completed', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
+    reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+
+    const page = Number(request.query.page) || 1;
+
+    const result = await zoro.fetchRecentlyCompleted(page);
+    if ('error' in result) {
+      return reply.status(500).send({
+        hasNextPage: result.hasNextPage,
+        currentPage: result.currentPage,
+        lastPage: result.lastPage,
+        error: result.error,
+        data: result.data,
+        topAnime: result.topAnime,
+      });
+    }
+    return reply.status(200).send({
+      hasNextPage: result.hasNextPage,
+      currentPage: result.currentPage,
+      lastPage: result.lastPage,
+      error: result.error,
+      data: result.data,
+      topAnime: result.topAnime,
+    });
+  });
+
+  fastify.get('/recently-updated', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
+    reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+
+    const page = Number(request.query.page) || 1;
+
+    const result = await zoro.fetchRecentlyUpdated(page);
+    if ('error' in result) {
+      return reply.status(500).send({
+        hasNextPage: result.hasNextPage,
+        currentPage: result.currentPage,
+        lastPage: result.lastPage,
+        error: result.error,
+        data: result.data,
+        topAnime: result.topAnime,
+      });
+    }
+    return reply.status(200).send({
+      hasNextPage: result.hasNextPage,
+      currentPage: result.currentPage,
+      lastPage: result.lastPage,
+      error: result.error,
+      data: result.data,
+      topAnime: result.topAnime,
+    });
+  });
+
+  fastify.get('/recently-added', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
+    reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+
+    const page = Number(request.query.page) || 1;
+
+    const result = await zoro.fetchRecentlyAdded(page);
+    if ('error' in result) {
+      return reply.status(500).send({
+        hasNextPage: result.hasNextPage,
+        currentPage: result.currentPage,
+        lastPage: result.lastPage,
+        error: result.error,
+        data: result.data,
+        topAnime: result.topAnime,
+      });
+    }
+    return reply.status(200).send({
+      hasNextPage: result.hasNextPage,
+      currentPage: result.currentPage,
+      lastPage: result.lastPage,
+      error: result.error,
+      data: result.data,
+      topAnime: result.topAnime,
+    });
+  });
+
+  fastify.get(
+    '/az-list:sort',
+    async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
+      reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+
+      const page = Number(request.query.page) || 1;
+      const sort = String(request.params.sort);
+
+      const result = await zoro.fetchAtoZList(sort, page);
+      if ('error' in result) {
+        return reply.status(500).send({
+          hasNextPage: result.hasNextPage,
+          currentPage: result.currentPage,
+          lastPage: result.lastPage,
+          error: result.error,
+          data: result.data,
+        });
+      }
+      return reply.status(200).send({
+        hasNextPage: result.hasNextPage,
+        currentPage: result.currentPage,
+        lastPage: result.lastPage,
+        error: result.error,
+        data: result.data,
+      });
+    },
+  );
+
+  fastify.get(
+    '/genre/:genre',
+    async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
+      reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+
+      const page = Number(request.query.page) || 1;
+      const genre = String(request.params.genre);
+      const validGenre = toHIGenres(genre);
+
+      const result = await zoro.fetchGenre(validGenre, page);
+      if ('error' in result) {
+        return reply.status(500).send({
+          hasNextPage: result.hasNextPage,
+          currentPage: result.currentPage,
+          lastPage: result.lastPage,
+          error: result.error,
+          data: result.data,
+        });
+      }
+      return reply.status(200).send({
+        hasNextPage: result.hasNextPage,
+        currentPage: result.currentPage,
+        lastPage: result.lastPage,
+        error: result.error,
+        data: result.data,
+      });
+    },
+  );
+  fastify.get('/episodes/:animeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
+    const animeId = String(request.params.animeId);
+
+    reply.header('Cache-Control', 's-maxage=7200, stale-while-revalidate=300');
+
+    const result = await zoro.fetchEpisodes(animeId);
+
+    if ('error' in result) {
+      return reply.status(500).send({
+        error: result.error,
+        data: result.data,
+      });
+    }
+    return reply.status(200).send({
+      data: result.data,
+    });
+  });
+
+  fastify.get('/servers/:episodeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
+    const episodeId = String(request.params.episodeId);
+
+    reply.header('Cache-Control', 's-maxage=3600, stale-while-revalidate=300');
+
+    const result = await zoro.fetchServers(episodeId);
+
+    if ('error' in result) {
+      return reply.status(500).send({
+        error: result.error,
+        data: result.data,
+      });
+    }
+    return reply.status(200).send({
+      data: result.data,
+    });
+  });
 
   fastify.get(
     '/watch/:episodeId',
@@ -118,9 +399,10 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
           error: result.error,
           headers: result.headers,
           data: result.data,
+          syncData: result.syncData,
         });
       }
-      return reply.status(200).send({ headers: result.headers, data: result.data });
+      return reply.status(200).send({ headers: result.headers, data: result.data, syncData: result.syncData });
     },
   );
 }
