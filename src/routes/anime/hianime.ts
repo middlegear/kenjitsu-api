@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { HiAnime } from '@middlegear/hakai-extensions';
-import { toZoroServers, toCategory, toHIGenres } from '../../utils/utils.js';
+import { toZoroServers, toCategory, toHIGenres, toFormatHianime } from '../../utils/utils.js';
 import type { FastifyParams, FastifyQuery } from '../../utils/types.js';
 
 const zoro = new HiAnime();
@@ -75,7 +75,7 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
   fastify.get('/info/:animeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     const animeId = String(request.params.animeId);
 
-    reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+    reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
 
     const result = await zoro.fetchAnimeInfo(animeId);
     if ('error' in result) {
@@ -102,7 +102,7 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.get('/home', async (request: FastifyRequest, reply: FastifyReply) => {
-    reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+    reply.header('Cache-Control', `s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
 
     const result = await zoro.fetchHome();
     if ('error' in result) {
@@ -133,7 +133,7 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.get('/top-airing', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
-    reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+    reply.header('Cache-Control', `s-maxage=${12 * 60 * 60}, stale-while-revalidate=300`);
 
     const page = Number(request.query.page) || 1;
 
@@ -144,22 +144,21 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
         currentPage: result.currentPage,
         lastPage: result.lastPage,
         error: result.error,
-        data: result.data,
         topAnime: result.topAnime,
+        data: result.data,
       });
     }
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
       lastPage: result.lastPage,
-      error: result.error,
-      data: result.data,
       topAnime: result.topAnime,
+      data: result.data,
     });
   });
 
   fastify.get('/favourites', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
-    reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+    reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
 
     const page = Number(request.query.page) || 1;
 
@@ -170,22 +169,21 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
         currentPage: result.currentPage,
         lastPage: result.lastPage,
         error: result.error,
-        data: result.data,
         topAnime: result.topAnime,
+        data: result.data,
       });
     }
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
       lastPage: result.lastPage,
-      error: result.error,
-      data: result.data,
       topAnime: result.topAnime,
+      data: result.data,
     });
   });
 
   fastify.get('/most-popular', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
-    reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+    reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
 
     const page = Number(request.query.page) || 1;
 
@@ -196,22 +194,21 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
         currentPage: result.currentPage,
         lastPage: result.lastPage,
         error: result.error,
-        data: result.data,
         topAnime: result.topAnime,
+        data: result.data,
       });
     }
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
       lastPage: result.lastPage,
-      error: result.error,
-      data: result.data,
       topAnime: result.topAnime,
+      data: result.data,
     });
   });
 
   fastify.get('/recently-completed', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
-    reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+    reply.header('Cache-Control', `s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
 
     const page = Number(request.query.page) || 1;
 
@@ -230,14 +227,13 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
       lastPage: result.lastPage,
-      error: result.error,
-      data: result.data,
       topAnime: result.topAnime,
+      data: result.data,
     });
   });
 
   fastify.get('/recently-updated', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
-    reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+    reply.header('Cache-Control', `s-maxage=${0.5 * 60 * 60}, stale-while-revalidate=300`);
 
     const page = Number(request.query.page) || 1;
 
@@ -248,22 +244,21 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
         currentPage: result.currentPage,
         lastPage: result.lastPage,
         error: result.error,
-        data: result.data,
         topAnime: result.topAnime,
+        data: result.data,
       });
     }
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
       lastPage: result.lastPage,
-      error: result.error,
-      data: result.data,
       topAnime: result.topAnime,
+      data: result.data,
     });
   });
 
   fastify.get('/recently-added', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
-    reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+    reply.header('Cache-Control', `s-maxage=${0.5 * 60 * 60}, stale-while-revalidate=300`);
 
     const page = Number(request.query.page) || 1;
 
@@ -274,24 +269,23 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
         currentPage: result.currentPage,
         lastPage: result.lastPage,
         error: result.error,
-        data: result.data,
         topAnime: result.topAnime,
+        data: result.data,
       });
     }
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
       lastPage: result.lastPage,
-      error: result.error,
-      data: result.data,
       topAnime: result.topAnime,
+      data: result.data,
     });
   });
 
   fastify.get(
     '/az-list:sort',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
-      reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+      reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
 
       const page = Number(request.query.page) || 1;
       const sort = String(request.params.sort);
@@ -310,16 +304,86 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
         lastPage: result.lastPage,
-        error: result.error,
         data: result.data,
       });
     },
   );
 
+  fastify.get('/subbed', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
+    reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
+
+    const page = Number(request.query.page) || 1;
+
+    const result = await zoro.fetchSubbedAnime(page);
+    if ('error' in result) {
+      return reply.status(500).send({
+        hasNextPage: result.hasNextPage,
+        currentPage: result.currentPage,
+        lastPage: result.lastPage,
+        error: result.error,
+        data: result.data,
+      });
+    }
+    return reply.status(200).send({
+      hasNextPage: result.hasNextPage,
+      currentPage: result.currentPage,
+      lastPage: result.lastPage,
+      data: result.data,
+    });
+  });
+
+  fastify.get('/dubbed', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
+    reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
+
+    const page = Number(request.query.page) || 1;
+
+    const result = await zoro.fetchDubbedAnime(page);
+    if ('error' in result) {
+      return reply.status(500).send({
+        hasNextPage: result.hasNextPage,
+        currentPage: result.currentPage,
+        lastPage: result.lastPage,
+        error: result.error,
+        data: result.data,
+      });
+    }
+    return reply.status(200).send({
+      hasNextPage: result.hasNextPage,
+      currentPage: result.currentPage,
+      lastPage: result.lastPage,
+      data: result.data,
+    });
+  });
+
+  fastify.get('/category', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
+    reply.header('Cache-Control', `s-maxage=${72 * 60 * 60}, stale-while-revalidate=300`); // check if nezha movie is still first from 29/08 at 0013Hrs or increase cache value
+
+    const page = Number(request.query.page) || 1;
+    const format = request.query.format || 'TV';
+    const newformat = toFormatHianime(format);
+
+    const result = await zoro.fetchAnimeCategory(newformat, page);
+    if ('error' in result) {
+      return reply.status(500).send({
+        hasNextPage: result.hasNextPage,
+        currentPage: result.currentPage,
+        lastPage: result.lastPage,
+        error: result.error,
+        data: result.data,
+      });
+    }
+    return reply.status(200).send({
+      hasNextPage: result.hasNextPage,
+      currentPage: result.currentPage,
+      lastPage: result.lastPage,
+      data: result.data,
+    });
+  });
+
   fastify.get(
     '/genre/:genre',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
-      reply.header('Cache-Control', 's-maxage=43200, stale-while-revalidate=300');
+      reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
       const page = Number(request.query.page) || 1;
       const genre = String(request.params.genre);
@@ -339,7 +403,6 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
         lastPage: result.lastPage,
-        error: result.error,
         data: result.data,
       });
     },
@@ -347,7 +410,7 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
   fastify.get('/episodes/:animeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     const animeId = String(request.params.animeId);
 
-    reply.header('Cache-Control', 's-maxage=7200, stale-while-revalidate=300');
+    reply.header('Cache-Control', `s-maxage=${0.5 * 60 * 60}, stale-while-revalidate=300`); // check this value could get a mapping the anilistId /mal and check for status i can cache it depending
 
     const result = await zoro.fetchEpisodes(animeId);
 
@@ -365,7 +428,7 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
   fastify.get('/servers/:episodeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     const episodeId = String(request.params.episodeId);
 
-    reply.header('Cache-Control', 's-maxage=3600, stale-while-revalidate=300');
+    reply.header('Cache-Control', `s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
 
     const result = await zoro.fetchServers(episodeId);
 

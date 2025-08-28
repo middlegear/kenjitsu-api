@@ -39,7 +39,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -49,7 +49,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
-      total: result.total,
+      totalResults: result.totalResults,
       perPage: result.perPage,
       lastPage: result.lastPage,
       data: result.data,
@@ -104,7 +104,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({
         hasNextPage: cachedData.hasNextPage,
         currentPage: cachedData.currentPage,
-        total: cachedData.total,
+        totalResults: cachedData.totalResults,
         perPage: cachedData.perPage,
         lastPage: cachedData.lastPage,
         data: cachedData.data,
@@ -115,7 +115,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -126,7 +126,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       const cacheableData = {
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -137,7 +137,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
-      total: result.total,
+      totalResults: result.totalResults,
       perPage: result.perPage,
       lastPage: result.lastPage,
       data: result.data,
@@ -159,7 +159,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({
         hasNextPage: cachedData.hasNextPage,
         currentPage: cachedData.currentPage,
-        total: cachedData.total,
+        totalResults: cachedData.totalResults,
         perPage: cachedData.perPage,
         lastPage: cachedData.lastPage,
         data: cachedData.data,
@@ -172,7 +172,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -183,7 +183,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       const cacheableData = {
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -194,7 +194,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
-      total: result.total,
+      totalResults: result.totalResults,
       perPage: result.perPage,
       lastPage: result.lastPage,
       data: result.data,
@@ -215,7 +215,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({
         hasNextPage: cachedData.hasNextPage,
         currentPage: cachedData.currentPage,
-        total: cachedData.total,
+        totalResults: cachedData.totalResults,
         perPage: cachedData.perPage,
         lastPage: cachedData.lastPage,
         data: cachedData.data,
@@ -228,7 +228,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       const cacheableData = {
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -241,7 +241,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -251,7 +251,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
-      total: result.total,
+      totalResults: result.totalResults,
       perPage: result.perPage,
       lastPage: result.lastPage,
       data: result.data,
@@ -272,7 +272,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({
         hasNextPage: cachedData.hasNextPage,
         currentPage: cachedData.currentPage,
-        total: cachedData.total,
+        totalResults: cachedData.totalResults,
         perPage: cachedData.perPage,
         lastPage: cachedData.lastPage,
         data: cachedData.data,
@@ -284,7 +284,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       const cacheableData = {
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -297,7 +297,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -307,7 +307,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
-      total: result.total,
+      totalResults: result.totalResults,
       perPage: result.perPage,
       lastPage: result.lastPage,
       data: result.data,
@@ -332,20 +332,20 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
         return reply.status(200).send({
           hasNextPage: cachedData.hasNextPage,
           currentPage: cachedData.currentPage,
-          total: cachedData.total,
+          totalResults: cachedData.totalResults,
           perPage: cachedData.perPage,
           lastPage: cachedData.lastPage,
           data: cachedData.data,
         });
       }
 
-      const result = await jikan.fetchSeason(season, year, format, page, perPage);
+      const result = await jikan.fetchSeasonalAnime(season, year, format, page, perPage);
 
       if (result.data.length > 0) {
         const cacheableData = {
           hasNextPage: result.hasNextPage,
           currentPage: result.currentPage,
-          total: result.total,
+          totalResults: result.totalResults,
           perPage: result.perPage,
           lastPage: result.lastPage,
           data: result.data,
@@ -358,7 +358,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({
           hasNextPage: result.hasNextPage,
           currentPage: result.currentPage,
-          total: result.total,
+          totalResults: result.totalResults,
           perPage: result.perPage,
           lastPage: result.lastPage,
           data: result.data,
@@ -368,7 +368,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -391,7 +391,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({
         hasNextPage: cachedData.hasNextPage,
         currentPage: cachedData.currentPage,
-        total: cachedData.total,
+        totalResults: cachedData.totalResults,
         perPage: cachedData.perPage,
         lastPage: cachedData.lastPage,
         data: cachedData.data,
@@ -403,7 +403,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       const cacheableData = {
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -416,7 +416,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -426,7 +426,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
-      total: result.total,
+      totalResults: result.totalResults,
       perPage: result.perPage,
       lastPage: result.lastPage,
       data: result.data,
@@ -448,7 +448,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({
         hasNextPage: cachedData.hasNextPage,
         currentPage: cachedData.currentPage,
-        total: cachedData.total,
+        totalResults: cachedData.totalResults,
         perPage: cachedData.perPage,
         lastPage: cachedData.lastPage,
         data: cachedData.data,
@@ -460,7 +460,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       const cacheableData = {
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -473,7 +473,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -483,7 +483,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
-      total: result.total,
+      totalResults: result.totalResults,
       perPage: result.perPage,
       lastPage: result.lastPage,
       data: result.data,
@@ -554,10 +554,10 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     '/get-provider/:malId',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
       const malId = Number(request.params.malId);
-      const provider = request.query.provider || 'hianime';
-      const newprovider = toProvider(provider) as AnimeProviderApi;
+      // const provider = request.query.provider || 'hianime';
+      // const newprovider = toProvider(provider) as AnimeProviderApi;
 
-      const result = await jikan.fetchProviderAnimeId(malId, newprovider);
+      const result = await jikan.fetchProviderId(malId);
 
       let timecached: number;
       const status = result.data?.status.toLowerCase().trim();
@@ -565,11 +565,12 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
       reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`);
 
-      const cacheKey = `jikan-provider-id-${malId}-${newprovider}`;
+      // const cacheKey = `jikan-provider-id-${malId}-${newprovider}`;
+      const cacheKey = `jikan-provider-id-${malId}`;
       if ('error' in result) {
         return reply.status(500).send({
           data: result.data,
-          animeProvider: result.animeProvider,
+          provider: result.provider,
           error: result.error,
         });
       }
@@ -578,13 +579,13 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       if (cachedData) {
         return reply.status(200).send({
           data: cachedData.data,
-          animeProvider: cachedData.animeProvider,
+          provider: cachedData.provider,
         });
       }
-      if (result.data !== null && result.animeProvider !== null) {
+      if (result.data !== null && result.provider !== null) {
         const cacheableData = {
           data: result.data,
-          animeProvider: result.animeProvider,
+          provider: result.provider,
         };
 
         await redisSetCache(cacheKey, cacheableData, 2);
@@ -592,7 +593,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
       return reply.status(200).send({
         data: result.data,
-        animeProvider: result.animeProvider,
+        provider: result.provider,
       });
     },
   );
@@ -601,18 +602,20 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     '/provider-episodes/:malId',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
       const malId = Number(request.params.malId);
-      const provider = request.query.provider || 'hianime';
+      // const provider = request.query.provider || 'hianime';
 
-      const newprovider = toProvider(provider) as AnimeProviderApi;
+      // const newprovider = toProvider(provider) as AnimeProviderApi;
 
-      const result = await jikan.fetchAnimeProviderEpisodes(malId, newprovider);
+      const result = await jikan.fetchAnimeProviderEpisodes(malId);
 
       let timecached: number;
       const status = result.data?.status.toLowerCase().trim();
       status === 'finished airing' ? (timecached = 148) : (timecached = 1);
       reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`);
 
-      const cacheKey = `jikan-provider-episodes-${malId}-${newprovider}`;
+      // const cacheKey = `jikan-provider-episodes-${malId}-${newprovider}`;
+      const cacheKey = `jikan-provider-episodes-${malId}`;
+
       const cachedData = (await redisGetCache(cacheKey)) as AnilistInfo;
       if (cachedData) {
         return reply.status(200).send({

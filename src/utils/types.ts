@@ -20,7 +20,7 @@ export interface FastifyQuery {
   format?: string;
   category?: string;
   server?: string;
-  provider?: string;
+  // provider?: string; disabled
   timeWindow?: string;
   season?: string;
   episode?: number;
@@ -61,13 +61,13 @@ type provider = {
 };
 export type AnilistInfo = {
   data: AnilistData;
-  animeProvider?: provider;
+  provider?: provider;
   providerEpisodes?: KaiEpisodes[];
 };
 export type AnilistRepetitive = {
+  totalResults: number;
   data: AnilistData[];
   hasNextPage: boolean;
-  total: number;
   lastPage: number;
   currentPage: number;
   perPage: number;

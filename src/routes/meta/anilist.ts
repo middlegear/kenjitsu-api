@@ -42,7 +42,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -52,7 +52,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
-      total: result.total,
+      totalResults: result.totalResults,
       perPage: result.perPage,
       lastPage: result.lastPage,
       data: result.data,
@@ -108,18 +108,18 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({
         hasNextPage: cachedData.hasNextPage,
         currentPage: cachedData.currentPage,
-        total: cachedData.total,
+        totalResults: cachedData.totalResults,
         perPage: cachedData.perPage,
         lastPage: cachedData.lastPage,
         data: cachedData.data,
       });
     }
-    const result = await anilist.fetchAiring(page, perPage);
+    const result = await anilist.fetchTopAiring(page, perPage);
     if ('error' in result) {
       return reply.status(500).send({
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -130,7 +130,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       const cacheableData = {
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -142,7 +142,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
-      total: result.total,
+      totalResults: result.totalResults,
       perPage: result.perPage,
       lastPage: result.lastPage,
       data: result.data,
@@ -166,7 +166,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({
         hasNextPage: cachedData.hasNextPage,
         currentPage: cachedData.currentPage,
-        total: cachedData.total,
+        totalResults: cachedData.totalResults,
         perPage: cachedData.perPage,
         lastPage: cachedData.lastPage,
         data: cachedData.data,
@@ -179,7 +179,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -190,7 +190,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       const cacheableData = {
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -202,7 +202,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
-      total: result.total,
+      totalResults: result.totalResults,
       perPage: result.perPage,
       lastPage: result.lastPage,
       data: result.data,
@@ -226,7 +226,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
         data: cachedData.data,
         hasNextPage: cachedData.hasNextPage,
         currentPage: cachedData.currentPage,
-        total: cachedData.total,
+        totalResults: cachedData.totalResults,
         perPage: cachedData.perPage,
         lastPage: cachedData.lastPage,
       });
@@ -238,7 +238,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -249,7 +249,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       const cacheableData = {
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -261,7 +261,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
-      total: result.total,
+      totalResults: result.totalResults,
       perPage: result.perPage,
       lastPage: result.lastPage,
       data: result.data,
@@ -282,7 +282,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({
         hasNextPage: cachedData.hasNextPage,
         currentPage: cachedData.currentPage,
-        total: cachedData.total,
+        totalResults: cachedData.totalResults,
         perPage: cachedData.perPage,
         lastPage: cachedData.lastPage,
         data: cachedData.data,
@@ -294,7 +294,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -305,7 +305,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       const cacheableData = {
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -317,7 +317,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
-      total: result.total,
+      totalResults: result.totalResults,
       perPage: result.perPage,
       lastPage: result.lastPage,
       data: result.data,
@@ -355,7 +355,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({
         hasNextPage: cachedData.hasNextPage,
         currentPage: cachedData.currentPage,
-        total: cachedData.total,
+        totalResults: cachedData.totalResults,
         perPage: cachedData.perPage,
         lastPage: cachedData.lastPage,
         data: cachedData.data,
@@ -367,7 +367,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -378,7 +378,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       const cacheableData = {
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -390,7 +390,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
-      total: result.total,
+      totalResults: result.totalResults,
       perPage: result.perPage,
       lastPage: result.lastPage,
       data: result.data,
@@ -428,13 +428,13 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
       reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
-      const result = await anilist.fetchSeasonalAnime(newseason, year, newformat, page, perPage);
+      const result = await anilist.fetchSeasonalAnime(newseason, year, page, perPage, newformat);
 
       if ('error' in result) {
         return reply.status(500).send({
           hasNextPage: result.hasNextPage,
           currentPage: result.currentPage,
-          total: result.total,
+          totalResults: result.totalResults,
           perPage: result.perPage,
           lastPage: result.lastPage,
           data: result.data,
@@ -444,7 +444,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({
         hasNextPage: result.hasNextPage,
         currentPage: result.currentPage,
-        total: result.total,
+        totalResults: result.totalResults,
         perPage: result.perPage,
         lastPage: result.lastPage,
         data: result.data,
@@ -456,34 +456,35 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     '/get-provider/:anilistId',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
       const anilistId = Number(request.params.anilistId);
-      const provider = request.query.provider || 'hianime';
+      // const provider = request.query.provider || 'hianime';
 
       reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
-      const newprovider = toProvider(provider) as AnimeProviderApi;
+      // const newprovider = toProvider(provider) as AnimeProviderApi;
 
-      const cacheKey = `anilist-provider-id-${anilistId}-${newprovider}`;
+      const cacheKey = `anilist-provider-id-${anilistId}`;
+      // const cacheKey = `anilist-provider-id-${anilistId}-${newprovider}`;
 
       const cachedData = (await redisGetCache(cacheKey)) as AnilistInfo;
       if (cachedData) {
         return reply.status(200).send({
           data: cachedData.data,
-          animeProvider: cachedData.animeProvider,
+          provider: cachedData.provider,
         });
       }
-      const result = await anilist.fetchProviderAnimeId(anilistId, newprovider);
+      const result = await anilist.fetchProviderId(anilistId);
       if ('error' in result) {
         return reply.status(500).send({
           data: result.data,
-          animeProvider: result.animeProvider,
+          provider: result.provider,
           error: result.error,
         });
       }
 
-      if (result.data !== null && result.animeProvider !== null) {
+      if (result.data !== null && result.provider !== null) {
         const cacheableData = {
           data: result.data,
-          animeProvider: result.animeProvider,
+          provider: result.provider,
         };
 
         await redisSetCache(cacheKey, cacheableData, 2);
@@ -491,7 +492,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
       return reply.status(200).send({
         data: result.data,
-        animeProvider: result.animeProvider,
+        provider: result.provider,
       });
     },
   );
@@ -500,12 +501,14 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     '/provider-episodes/:anilistId',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
       const anilistId = Number(request.params.anilistId);
-      const provider = request.query.provider || 'hianime';
-      const newprovider = toProvider(provider);
+      // const provider = request.query.provider || 'hianime';
+      // const newprovider = toProvider(provider);
 
       reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
-      const cacheKey = `anilist-provider-episodes-${anilistId}-${newprovider}`;
+      const cacheKey = `anilist-provider-episodes-${anilistId}`;
+
+      // const cacheKey = `anilist-provider-episodes-${anilistId}-${newprovider}`;
 
       const cachedData = (await redisGetCache(cacheKey)) as AnilistInfo;
       if (cachedData) {
@@ -515,7 +518,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
         });
       }
 
-      const result = await anilist.fetchAnimeProviderEpisodes(anilistId, newprovider);
+      const result = await anilist.fetchAnimeProviderEpisodes(anilistId);
 
       if ('error' in result) {
         return reply.status(500).send({

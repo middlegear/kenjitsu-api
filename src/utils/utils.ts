@@ -8,7 +8,14 @@ const Format = {
 } as const;
 
 type Format = (typeof Format)[keyof typeof Format];
-
+const IAnimeCategory = {
+  TV: 'TV',
+  MOVIE: 'MOVIE',
+  SPECIAL: 'SPECIALS',
+  OVA: 'OVA',
+  ONA: 'ONA',
+} as const;
+type IAnimeCategory = (typeof IAnimeCategory)[keyof typeof IAnimeCategory];
 export function toFormatAnilist(input: string): Format {
   if (!input) {
     input = Format.TV;
@@ -23,7 +30,20 @@ export function toFormatAnilist(input: string): Format {
   const validFormats = Object.values(Format).join(' or ');
   throw new Error(`Invalid input: ${input}. Required inputs are: ${validFormats}`);
 }
+export function toFormatHianime(input: string): IAnimeCategory {
+  if (!input) {
+    input = IAnimeCategory.TV;
+  }
 
+  const upperCaseInput = input.toUpperCase().trim();
+
+  if (Object.values(IAnimeCategory).includes(upperCaseInput as IAnimeCategory)) {
+    return upperCaseInput as IAnimeCategory;
+  }
+
+  const validFormats = Object.values(Format).join(' or ');
+  throw new Error(`Invalid input: ${input}. Required inputs are: ${validFormats}`);
+}
 const Seasons = {
   WINTER: 'WINTER',
   SPRING: 'SPRING',
