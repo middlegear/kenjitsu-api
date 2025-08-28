@@ -144,16 +144,16 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
         currentPage: result.currentPage,
         lastPage: result.lastPage,
         error: result.error,
-        topAnime: result.topAnime,
         data: result.data,
+        topAnime: result.topAnime,
       });
     }
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
       lastPage: result.lastPage,
-      topAnime: result.topAnime,
       data: result.data,
+      topAnime: result.topAnime,
     });
   });
 
@@ -169,16 +169,16 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
         currentPage: result.currentPage,
         lastPage: result.lastPage,
         error: result.error,
-        topAnime: result.topAnime,
         data: result.data,
+        topAnime: result.topAnime,
       });
     }
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
       lastPage: result.lastPage,
-      topAnime: result.topAnime,
       data: result.data,
+      topAnime: result.topAnime,
     });
   });
 
@@ -194,16 +194,16 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
         currentPage: result.currentPage,
         lastPage: result.lastPage,
         error: result.error,
-        topAnime: result.topAnime,
         data: result.data,
+        topAnime: result.topAnime,
       });
     }
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
       lastPage: result.lastPage,
-      topAnime: result.topAnime,
       data: result.data,
+      topAnime: result.topAnime,
     });
   });
 
@@ -227,8 +227,8 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
       lastPage: result.lastPage,
-      topAnime: result.topAnime,
       data: result.data,
+      topAnime: result.topAnime,
     });
   });
 
@@ -244,16 +244,16 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
         currentPage: result.currentPage,
         lastPage: result.lastPage,
         error: result.error,
-        topAnime: result.topAnime,
         data: result.data,
+        topAnime: result.topAnime,
       });
     }
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
       lastPage: result.lastPage,
-      topAnime: result.topAnime,
       data: result.data,
+      topAnime: result.topAnime,
     });
   });
 
@@ -269,21 +269,21 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
         currentPage: result.currentPage,
         lastPage: result.lastPage,
         error: result.error,
-        topAnime: result.topAnime,
         data: result.data,
+        topAnime: result.topAnime,
       });
     }
     return reply.status(200).send({
       hasNextPage: result.hasNextPage,
       currentPage: result.currentPage,
       lastPage: result.lastPage,
-      topAnime: result.topAnime,
       data: result.data,
+      topAnime: result.topAnime,
     });
   });
 
   fastify.get(
-    '/az-list:sort',
+    '/az-list/:sort',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
       reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
 
