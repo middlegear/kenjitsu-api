@@ -6,12 +6,7 @@ import type { FastifyParams, FastifyQuery } from '../../utils/types.js';
 const zoro = new HiAnime();
 
 export default async function HianimeRoutes(fastify: FastifyInstance) {
-  fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
-    return reply.send({
-      message: 'Welcome to Hianime Provider',
-    });
-  });
-
+  //
   fastify.get('/search', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     let q = request.query.q?.trim() ?? '';
     q = decodeURIComponent(q);

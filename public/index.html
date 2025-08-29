@@ -4,109 +4,120 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hakai API</title>
+    <title>Hakai API </title>
     <link rel="icon" type="image/png"
         href="https://m3jz13d05b.ufs.sh/f/dLgmbGNJLXerMjDNawBovlI3sdb2nkrUQc6OBfxYZGS19XE7" />
     <style>
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(1.25rem);
-                /* 20px */
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            color: #E0E0E0;
-            /* Light text for dark background */
-            text-align: center;
-            background-color: #121212;
-            /* Even darker background */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #e0e0e0;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            /* Prevent scrollbar from animation */
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #0a0014 0%, #140026 50%, #1c0033 100%);
+            /* darker purple shades */
         }
 
-        main {
-            max-width: 37.5rem;
-            /* 600px */
-            width: 90%;
-            /* Responsive width */
-            padding: 1.5rem;
-            /* 24px */
-            box-sizing: border-box;
-            animation: fadeIn 1s ease-out forwards;
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero-section {
+            text-align: center;
+            padding: 6rem 1rem;
         }
 
         h1 {
-            font-size: 3rem;
-            /* Larger, more impactful heading */
-            margin-bottom: 0.625rem;
-            /* 10px */
-            text-shadow: 0 0 0.625rem rgba(150, 0, 255, 0.7);
-            /* Subtle glow effect */
-            color: #F0F8FF;
-            /* Bright white */
-            letter-spacing: 0.05rem;
-            /* A little spacing for readability */
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #b060ff 0%, #8b4bce 50%, #d17fff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
         }
 
-        p {
-            font-size: 1.15rem;
-            /* Slightly larger paragraph text */
-            line-height: 1.7;
-            margin-bottom: 2.5rem;
-            /* 40px - more space before button */
-            color: #B0B0B0;
-            /* Slightly muted for contrast */
+        .subtitle {
+            font-size: 1.4rem;
+            color: #c4a5e5;
+            margin-bottom: 3rem;
+            line-height: 1.6;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .docs-link {
-            display: inline-block;
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
             padding: 1rem 2rem;
-            /* 16px 32px */
-            background-color: #5A128C;
-            /* Richer purple */
-            color: #F0F8FF;
-            /* White text */
+            background: linear-gradient(135deg, #6a4c93 0%, #9d4edd 100%);
+            color: white;
             text-decoration: none;
             font-weight: 600;
-            border-radius: 0.5rem;
-            /* 8px */
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.4);
-            /* Enhanced shadow */
+            font-size: 1rem;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
         }
 
-        .docs-link:hover {
-            background-color: #7B3FE3;
-            /* Brighter purple on hover */
-            transform: translateY(-0.1875rem) scale(1.02);
-            /* -3px */
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
-            /* More prominent shadow */
+        .cta-button:hover {
+            background: linear-gradient(135deg, #8147b6 0%, #b060ff 100%);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
 
 <body>
-    <main>
-        <h1>Hakai API</h1>
-        <p>Discover anime. Explore, integrate, and build.</p>
-        <a href="https://hakai-documentation.vercel.app" class="docs-link">Discover the API</a>
-    </main>
+    <div class="container">
+        <section class="hero-section">
+            <h1>Hakai API</h1>
+            <p class="subtitle">
+                A single API for anime, movies, and TV data.
+            </p>
+            <div class="cta-buttons">
+                <a href="https://hakai-documentation.vercel.app" class="cta-button">
+                    <span>Read the Docs</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" />
+                    </svg>
+                </a>
+            </div>
+        </section>
+    </div>
 </body>
 
 </html>

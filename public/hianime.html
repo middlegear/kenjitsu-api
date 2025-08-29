@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hakai API</title>
+    <link rel="icon" type="image/png"
+        href="https://m3jz13d05b.ufs.sh/f/dLgmbGNJLXerMjDNawBovlI3sdb2nkrUQc6OBfxYZGS19XE7" />
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            /* prevent scrollbars */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #0c0c1b 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+        }
+
+        .hero {
+            height: 100svh;
+            /* safe viewport height for mobile */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background-image: url('https://m3jz13d05b.ufs.sh/f/dLgmbGNJLXerlRqewdyFsJLdi7YxEHIpem5GaO1Q4MSqyR09');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(11, 11, 26, 0.7);
+        }
+
+        .hero-content {
+            max-width: 600px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-text h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin: 0 0 1rem 0;
+            line-height: 1.1;
+            color: #ffffff;
+        }
+
+        .hero-text p {
+            font-size: 1.5rem;
+            color: #b0b0b0;
+            margin: 0 0 3rem 0;
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1.25rem 2.5rem;
+            background: linear-gradient(135deg, #a3063a, #bc2ad6);
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(233, 30, 99, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(233, 30, 99, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-text p {
+                font-size: 1.25rem;
+            }
+
+            .hero {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1> Hianime Provider</h1>
+                <p>An API serving data from Hianime.to</p>
+                <a href="https://hakai-documentation.vercel.app/anime/hianime" class="cta-button">Read the docs</a>
+
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>
