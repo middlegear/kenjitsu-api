@@ -14,6 +14,7 @@ import fastifyCors, { corsOptions } from './config/cors.js';
 
 const app = Fastify({
   logger: { level: 'info' },
+  maxParamLength: 15000,
 });
 
 async function FastifyApp() {
