@@ -1,9 +1,15 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { Anilist, type AllAnimeSourceResponseMap, type HianimeSourceResponse } from '@middlegear/hakai-extensions';
-import { toFormatAnilist, toAnilistSeasons, toCategory, toProvider, type AnimeProviderApi } from '../../utils/utils.js';
+import { Anilist } from '@middlegear/hakai-extensions';
+import {
+  toFormatAnilist,
+  toAnilistSeasons,
+  toCategory,
+  toProvider,
+  type AnimeProviderApi,
+  toZoroServers,
+} from '../../utils/utils.js';
 import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
 import type { AnilistInfo, AnilistRepetitive, FastifyParams, FastifyQuery } from '../../utils/types.js';
-import { resourceUsage } from 'process';
 
 const anilist = new Anilist();
 
@@ -540,20 +546,21 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     },
   );
 
-  //// will have to change this stuff at the extensions library level for now ill live  with this fpr both anilist and jikan
   fastify.get(
     '/watch/:episodeId',
     async (request: FastifyRequest<{ Params: FastifyParams; Querystring: FastifyQuery }>, reply: FastifyReply) => {
       const episodeId = String(request.params.episodeId);
       const category = request.query.category || 'sub';
+      const server = request.query.server || 'hd-2';
 
+      const newserver = toZoroServers(server);
       const newcategory = toCategory(category);
 
       reply.header('Cache-Control', 's-maxage=420, stale-while-revalidate=60');
       let result;
 
       if (episodeId.includes('hianime')) {
-        result = (await anilist.fetchSources(episodeId, newcategory)) as HianimeSourceResponse;
+        result = await anilist.fetchHianimeProviderSources(episodeId, newcategory, newserver);
         if ('error' in result) {
           return reply.status(500).send({
             error: result.error,
@@ -563,7 +570,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
         }
       }
       if (episodeId.includes('allanime')) {
-        result = (await anilist.fetchSources(episodeId, newcategory)) as AllAnimeSourceResponseMap;
+        result = await anilist.fetchAllAnimeProviderSources(episodeId, newcategory);
         if ('error' in result) {
           return reply.status(500).send({
             error: result.error,
@@ -571,7 +578,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
           });
         }
       }
-      result = (await anilist.fetchSources(episodeId, newcategory)) as HianimeSourceResponse;
+      result = await anilist.fetchHianimeProviderSources(episodeId, newcategory, newserver);
       if ('error' in result) {
         return reply.status(500).send({
           error: result.error,
