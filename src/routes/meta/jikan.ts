@@ -679,8 +679,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
             data: result,
           });
         }
-      }
-      result = await jikan.fetchHianimeProviderSources(episodeId, newcategory, newserver);
+      } else result = await jikan.fetchHianimeProviderSources(episodeId, newcategory, newserver);
       if ('error' in result) {
         return reply.status(500).send({
           error: result.error,

@@ -569,7 +569,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
           });
         }
       }
-      if (episodeId.includes('allanime')) {
+      if (episodeId.startsWith('allanime')) {
         result = await anilist.fetchAllAnimeProviderSources(episodeId, newcategory);
         if ('error' in result) {
           return reply.status(500).send({
@@ -577,8 +577,9 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
             data: result,
           });
         }
+      } else {
+        result = await anilist.fetchHianimeProviderSources(episodeId, newcategory, newserver);
       }
-      result = await anilist.fetchHianimeProviderSources(episodeId, newcategory, newserver);
       if ('error' in result) {
         return reply.status(500).send({
           error: result.error,
