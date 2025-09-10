@@ -20,7 +20,7 @@ export interface FastifyQuery {
   format?: string;
   category?: string;
   server?: string;
-  // provider?: string; disabled
+  provider?: string;
   timeWindow?: string;
   season?: string;
   episode?: number;

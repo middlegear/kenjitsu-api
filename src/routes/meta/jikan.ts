@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { HiAnime, Jikan } from '@middlegear/hakai-extensions';
+import { HiAnime, Jikan, type AllAnimeSourceResponseMap, type HianimeSourceResponse } from '@middlegear/hakai-extensions';
 import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
 import type { FastifyQuery, FastifyParams, AnilistInfo, AnilistRepetitive } from '../../utils/types.js';
 import {
@@ -561,32 +561,29 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     '/get-provider/:malId',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
       const malId = Number(request.params.malId);
-      // const provider = request.query.provider || 'hianime';
-      // const newprovider = toProvider(provider) as AnimeProviderApi;
+      const provider = request.query.provider || 'hianime';
+      const newprovider = toProvider(provider) as AnimeProviderApi;
+
+      reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
+
+      const cacheKey = `jikan-provider-id-${malId}-${newprovider}`;
 
       const result = await jikan.fetchProviderId(malId);
-
-      let timecached: number;
-      const status = result.data?.status.toLowerCase().trim();
-      status === 'finished airing' ? (timecached = 148) : (timecached = 24);
-
-      reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`);
-
-      // const cacheKey = `jikan-provider-id-${malId}-${newprovider}`;
-      const cacheKey = `jikan-provider-id-${malId}`;
-      if ('error' in result) {
-        return reply.status(500).send({
-          data: result.data,
-          provider: result.provider,
-          error: result.error,
-        });
-      }
-
       const cachedData = (await redisGetCache(cacheKey)) as AnilistInfo;
       if (cachedData) {
         return reply.status(200).send({
           data: cachedData.data,
           provider: cachedData.provider,
+        });
+      }
+      let timecached: number;
+      const status = result.data?.status.toLowerCase().trim();
+      status === 'finished airing' ? (timecached = 148) : (timecached = 24);
+      if ('error' in result) {
+        return reply.status(500).send({
+          data: result.data,
+          provider: result.provider,
+          error: result.error,
         });
       }
       if (result.data !== null && result.provider !== null) {
@@ -609,19 +606,13 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     '/provider-episodes/:malId',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
       const malId = Number(request.params.malId);
-      // const provider = request.query.provider || 'hianime';
+      const provider = request.query.provider || 'hianime';
 
-      // const newprovider = toProvider(provider) as AnimeProviderApi;
+      reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
-      const result = await jikan.fetchAnimeProviderEpisodes(malId);
+      const newprovider = toProvider(provider) as AnimeProviderApi;
 
-      let timecached: number;
-      const status = result.data?.status.toLowerCase().trim();
-      status === 'finished airing' ? (timecached = 148) : (timecached = 1);
-      reply.header('Cache-Control', `s-maxage=${timecached * 60 * 60}, stale-while-revalidate=300`);
-
-      // const cacheKey = `jikan-provider-episodes-${malId}-${newprovider}`;
-      const cacheKey = `jikan-provider-episodes-${malId}`;
+      const cacheKey = `jikan-provider-episodes-${malId}-${newprovider}`;
 
       const cachedData = (await redisGetCache(cacheKey)) as AnilistInfo;
       if (cachedData) {
@@ -630,6 +621,12 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
           providerEpisodes: cachedData.providerEpisodes,
         });
       }
+
+      const result = await jikan.fetchAnimeProviderEpisodes(malId, newprovider);
+      let timecached: number;
+      const status = result.data?.status.toLowerCase().trim();
+      status === 'finished airing' ? (timecached = 148) : (timecached = 1);
+
       if ('error' in result) {
         return reply.status(500).send({
           data: result.data,
@@ -656,15 +653,32 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     async (request: FastifyRequest<{ Params: FastifyParams; Querystring: FastifyQuery }>, reply: FastifyReply) => {
       const episodeId = String(request.params.episodeId);
       const category = request.query.category || 'sub';
-      const server = request.query.server || 'hd-2';
 
-      const newserver = toZoroServers(server);
       const newcategory = toCategory(category);
 
       reply.header('Cache-Control', 's-maxage=420, stale-while-revalidate=60');
+      let result;
 
-      const result = await zoro.fetchSources(episodeId, newserver, newcategory);
-
+      if (episodeId.includes('hianime')) {
+        result = (await jikan.fetchSources(episodeId, newcategory)) as HianimeSourceResponse;
+        if ('error' in result) {
+          return reply.status(500).send({
+            error: result.error,
+            headers: result.headers,
+            data: result.data,
+          });
+        }
+      }
+      if (episodeId.includes('allanime')) {
+        result = (await jikan.fetchSources(episodeId, newcategory)) as AllAnimeSourceResponseMap;
+        if ('error' in result) {
+          return reply.status(500).send({
+            error: result.error,
+            data: result,
+          });
+        }
+      }
+      result = (await jikan.fetchSources(episodeId, newcategory)) as HianimeSourceResponse;
       if ('error' in result) {
         return reply.status(500).send({
           error: result.error,
@@ -672,7 +686,8 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
           data: result.data,
         });
       }
-      return reply.status(200).send({ headers: result.headers, data: result.data });
+
+      return reply.status(200).send(result);
     },
   );
 }

@@ -110,6 +110,7 @@ export function toZoroServers(input: string): ZoroServers {
 const AnimeProviderApi = {
   HiAnime: 'hianime',
   // Animekai: 'animekai',
+  AllAnime: 'allanime',
 } as const;
 
 export type AnimeProviderApi = (typeof AnimeProviderApi)[keyof typeof AnimeProviderApi]; // Extracts type

@@ -1,11 +1,11 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { Anilist, HiAnime } from '@middlegear/hakai-extensions';
-import { toFormatAnilist, toAnilistSeasons, toCategory, toZoroServers } from '../../utils/utils.js';
+import { Anilist, type AllAnimeSourceResponseMap, type HianimeSourceResponse } from '@middlegear/hakai-extensions';
+import { toFormatAnilist, toAnilistSeasons, toCategory, toProvider, type AnimeProviderApi } from '../../utils/utils.js';
 import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
 import type { AnilistInfo, AnilistRepetitive, FastifyParams, FastifyQuery } from '../../utils/types.js';
+import { resourceUsage } from 'process';
 
 const anilist = new Anilist();
-const zoro = new HiAnime();
 
 export default async function AnilistRoutes(fastify: FastifyInstance) {
   fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -449,14 +449,14 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     '/get-provider/:anilistId',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
       const anilistId = Number(request.params.anilistId);
-      // const provider = request.query.provider || 'hianime';
+      const provider = request.query.provider || 'hianime';
 
       reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
-      // const newprovider = toProvider(provider) as AnimeProviderApi;
+      const newprovider = toProvider(provider) as AnimeProviderApi;
 
-      const cacheKey = `anilist-provider-id-${anilistId}`;
-      // const cacheKey = `anilist-provider-id-${anilistId}-${newprovider}`;
+      // const cacheKey = `anilist-provider-id-${anilistId}`;
+      const cacheKey = `anilist-provider-id-${anilistId}-${newprovider}`;
 
       const cachedData = (await redisGetCache(cacheKey)) as AnilistInfo;
       if (cachedData) {
@@ -465,7 +465,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
           provider: cachedData.provider,
         });
       }
-      const result = await anilist.fetchProviderId(anilistId);
+      const result = await anilist.fetchProviderId(anilistId, newprovider);
       if ('error' in result) {
         return reply.status(500).send({
           data: result.data,
@@ -494,14 +494,14 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     '/provider-episodes/:anilistId',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
       const anilistId = Number(request.params.anilistId);
-      // const provider = request.query.provider || 'hianime';
-      // const newprovider = toProvider(provider);
+      const provider = request.query.provider || 'hianime';
+      const newprovider = toProvider(provider);
 
       reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
-      const cacheKey = `anilist-provider-episodes-${anilistId}`;
+      // const cacheKey = `anilist-provider-episodes-${anilistId}`;
 
-      // const cacheKey = `anilist-provider-episodes-${anilistId}-${newprovider}`;
+      const cacheKey = `anilist-provider-episodes-${anilistId}-${newprovider}`;
 
       const cachedData = (await redisGetCache(cacheKey)) as AnilistInfo;
       if (cachedData) {
@@ -511,7 +511,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
         });
       }
 
-      const result = await anilist.fetchAnimeProviderEpisodes(anilistId);
+      const result = await anilist.fetchAnimeProviderEpisodes(anilistId, newprovider);
 
       if ('error' in result) {
         return reply.status(500).send({
@@ -540,20 +540,38 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     },
   );
 
+  //// will have to change this stuff at the extensions library level for now ill live  with this fpr both anilist and jikan
   fastify.get(
     '/watch/:episodeId',
     async (request: FastifyRequest<{ Params: FastifyParams; Querystring: FastifyQuery }>, reply: FastifyReply) => {
       const episodeId = String(request.params.episodeId);
       const category = request.query.category || 'sub';
-      const server = request.query.server || 'hd-2';
 
-      const newserver = toZoroServers(server);
       const newcategory = toCategory(category);
 
       reply.header('Cache-Control', 's-maxage=420, stale-while-revalidate=60');
+      let result;
 
-      const result = await zoro.fetchSources(episodeId, newserver, newcategory);
-
+      if (episodeId.includes('hianime')) {
+        result = (await anilist.fetchSources(episodeId, newcategory)) as HianimeSourceResponse;
+        if ('error' in result) {
+          return reply.status(500).send({
+            error: result.error,
+            headers: result.headers,
+            data: result.data,
+          });
+        }
+      }
+      if (episodeId.includes('allanime')) {
+        result = (await anilist.fetchSources(episodeId, newcategory)) as AllAnimeSourceResponseMap;
+        if ('error' in result) {
+          return reply.status(500).send({
+            error: result.error,
+            data: result,
+          });
+        }
+      }
+      result = (await anilist.fetchSources(episodeId, newcategory)) as HianimeSourceResponse;
       if ('error' in result) {
         return reply.status(500).send({
           error: result.error,
@@ -561,7 +579,8 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
           data: result.data,
         });
       }
-      return reply.status(200).send({ headers: result.headers, data: result.data });
+
+      return reply.status(200).send(result);
     },
   );
 }
