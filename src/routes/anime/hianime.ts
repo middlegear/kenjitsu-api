@@ -7,6 +7,38 @@ const zoro = new HiAnime();
 
 export default async function HianimeRoutes(fastify: FastifyInstance) {
   //
+
+  fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
+    reply.header('Cache-Control', `s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
+
+    const result = await zoro.fetchHome();
+    if ('error' in result) {
+      return reply.status(500).send({
+        error: result.error,
+        data: result.data,
+        trending: result.trending,
+        topAnime: result.topAnime,
+        topAiring: result.topAiring,
+        mostPopular: result.mostPopular,
+        favourites: result.favourites,
+        recentlyCompleted: result.recentlyCompleted,
+        recentlyAdded: result.recentlyAdded,
+        recentlyUpdated: result.recentlyUpdated,
+      });
+    }
+    return reply.status(200).send({
+      data: result.data,
+      trending: result.trending,
+      topAnime: result.topAnime,
+      topAiring: result.topAiring,
+      mostPopular: result.mostPopular,
+      favourites: result.favourites,
+      recentlyCompleted: result.recentlyCompleted,
+      recentlyAdded: result.recentlyAdded,
+      recentlyUpdated: result.recentlyUpdated,
+    });
+  });
+
   fastify.get('/search', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     let q = request.query.q?.trim() ?? '';
     q = decodeURIComponent(q);
@@ -93,37 +125,6 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
       promotionVideos: result.promotionVideos,
       relatedAnime: result.relatedAnime,
       characters: result.characters,
-    });
-  });
-
-  fastify.get('/home', async (request: FastifyRequest, reply: FastifyReply) => {
-    reply.header('Cache-Control', `s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
-
-    const result = await zoro.fetchHome();
-    if ('error' in result) {
-      return reply.status(500).send({
-        error: result.error,
-        data: result.data,
-        trending: result.trending,
-        topAnime: result.topAnime,
-        topAiring: result.topAiring,
-        mostPopular: result.mostPopular,
-        favourites: result.favourites,
-        recentlyCompleted: result.recentlyCompleted,
-        recentlyAdded: result.recentlyAdded,
-        recentlyUpdated: result.recentlyUpdated,
-      });
-    }
-    return reply.status(200).send({
-      data: result.data,
-      trending: result.trending,
-      topAnime: result.topAnime,
-      topAiring: result.topAiring,
-      mostPopular: result.mostPopular,
-      favourites: result.favourites,
-      recentlyCompleted: result.recentlyCompleted,
-      recentlyAdded: result.recentlyAdded,
-      recentlyUpdated: result.recentlyUpdated,
     });
   });
 

@@ -263,3 +263,58 @@ export function toHIGenres(input: string): HIGenres {
   const validInput = Object.values(HIGenres).join(' or ');
   throw new Error(`Invalid input: ${input}. Required genre inputs are: ${validInput}`);
 }
+const AKGenres = [
+  'action',
+  'adventure',
+  'avant-garde',
+  'boys-love',
+  'comedy',
+  'demons',
+  'drama',
+  'ecchi',
+  'fantasy',
+  'girls-love',
+  'gourmet',
+  'harem',
+  'horror',
+  'isekai',
+  'iyashikei',
+  'josei',
+  'kids',
+  'magic',
+  'mahou-shoujo',
+  'martial-arts',
+  'mecha',
+  'military',
+  'music',
+  'mystery',
+  'parody',
+  'psychological',
+  'reverse-harem',
+  'romance',
+  'school',
+  'sci-fi',
+  'seinen',
+  'shoujo',
+  'shounen',
+  'slice-of-life',
+  'space',
+  'sports',
+  'super-power',
+  'supernatural',
+  'suspense',
+  'thriller',
+  'vampire',
+] as const;
+
+export type AKGenres = (typeof AKGenres)[number];
+export function toAKGenres(input: string): AKGenres {
+  const normalizedInput = input.toLowerCase().trim();
+
+  if (Object.values(AKGenres).some(provider => provider === normalizedInput)) {
+    return normalizedInput as AKGenres;
+  }
+
+  const validInput = Object.values(AKGenres).join(' or ');
+  throw new Error(`Invalid input: ${input}. Required genre inputs are: ${validInput}`);
+}
