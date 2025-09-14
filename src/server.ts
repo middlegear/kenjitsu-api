@@ -6,7 +6,7 @@ import AnimekaiRoutes from './routes/anime/animekai.js';
 import HianimeRoutes from './routes/anime/hianime.js';
 import AnilistRoutes from './routes/meta/anilist.js';
 import JikanRoutes from './routes/meta/jikan.js';
-import FlixHQRoutes from './routes/tv/flixhq.js';
+import FlixHQRoutes from './routes/movies/flixhq.js';
 import TheMovieDatabaseRoutes from './routes/meta/tmdb.js';
 
 import { ratelimitOptions, rateLimitPlugIn } from './config/ratelimit.js';
