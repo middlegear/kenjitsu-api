@@ -300,7 +300,7 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
 
       const episodeId = String(request.params.episodeId);
       const category = (request.query.category as 'sub' | 'dub' | 'raw') || 'sub';
-      const server = (request.query.server as 'hd-1' | 'hd-2' | 'hd-3') || 'hd-2';
+      // const server = (request.query.server as 'hd-1' | 'hd-2' | 'hd-3') || 'hd-2';
 
       if (!episodeId) {
         return reply.status(400).send({
@@ -312,12 +312,12 @@ export default async function HianimeRoutes(fastify: FastifyInstance) {
           error: `Invalid category picked: '${category}'. Expected one of 'sub','dub','raw'.`,
         });
       }
-      if (!['hd-1', 'hd-2', 'hd-3'].includes(server)) {
-        return reply.status(400).send({
-          error: `Invalid  streaming server selected: '${server}'. Expected one of 'hd-1', 'hd-2', 'hd-3'.`,
-        });
-      }
-      const result = await zoro.fetchSources(episodeId, server, category);
+      // if (!['hd-1', 'hd-2', 'hd-3'].includes(server)) {
+      //   return reply.status(400).send({
+      //     error: `Invalid  streaming server selected: '${server}'. Expected one of 'hd-1', 'hd-2', 'hd-3'.`,
+      //   });
+      // }
+      const result = await zoro.fetchSources(episodeId, 'hd-2', category);
 
       if ('error' in result) {
         return reply.status(500).send(result);
