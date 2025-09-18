@@ -270,16 +270,16 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
       const malId = Number(request.params.malId);
-      const provider = (request.query.provider as 'allanime' | 'hianime') || 'hianime';
+      const provider = (request.query.provider as 'allanime' | 'hianime' | 'animepahe') || 'hianime';
 
       if (!malId) {
         return reply.status(400).send({
           error: "Missing required path parameter: 'malId'.",
         });
       }
-      if (provider !== 'allanime' && provider !== 'hianime') {
+      if (provider !== 'allanime' && provider !== 'hianime' && provider !== 'animepahe') {
         return reply.status(400).send({
-          error: `Invalid provider ${provider} .Expected provider query paramater to be  'allanime' or 'hianime' `,
+          error: `Invalid provider ${provider} .Expected provider query paramater to be  'allanime' or 'hianime'or 'animepahe `,
         });
       }
       const result = await jikan.fetchProviderId(malId, provider);
@@ -298,16 +298,16 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
       const malId = Number(request.params.malId);
-      const provider = (request.query.provider as 'allanime' | 'hianime') || 'hianime';
+      const provider = (request.query.provider as 'allanime' | 'hianime' | 'animepahe') || 'hianime';
 
       if (!malId) {
         return reply.status(400).send({
           error: "Missing required path parameter: 'malId'.",
         });
       }
-      if (provider !== 'allanime' && provider !== 'hianime') {
+      if (provider !== 'allanime' && provider !== 'hianime' && provider !== 'animepahe') {
         return reply.status(400).send({
-          error: `Invalid provider ${provider} .Expected provider query paramater to be  'allanime' or 'hianime' `,
+          error: `Invalid provider ${provider} .Expected provider query paramater to be  'allanime' or 'hianime'or 'animepahe `,
         });
       }
       const result = await jikan.fetchAnimeProviderEpisodes(malId, provider);

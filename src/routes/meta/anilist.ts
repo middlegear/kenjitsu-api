@@ -208,16 +208,16 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
 
       const anilistId = Number(request.params.anilistId);
-      const provider = (request.query.provider as 'allanime' | 'hianime') || 'hianime';
+      const provider = (request.query.provider as 'allanime' | 'hianime' | 'animepahe') || 'hianime';
 
       if (!anilistId) {
         return reply.status(400).send({
           error: "Missing required path parameter: 'anilistId'.",
         });
       }
-      if (provider !== 'allanime' && provider !== 'hianime') {
+      if (provider !== 'allanime' && provider !== 'hianime' && provider !== 'animepahe') {
         return reply.status(400).send({
-          error: `Invalid provider ${provider} .Expected provider query paramater to be  'allanime' or 'hianime' `,
+          error: `Invalid provider ${provider} .Expected provider query paramater to be  'allanime' or 'hianime'or 'animepahe `,
         });
       }
       const result = await anilist.fetchProviderId(anilistId, provider);
@@ -235,16 +235,16 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
       const anilistId = Number(request.params.anilistId);
-      const provider = (request.query.provider as 'allanime' | 'hianime') || 'hianime';
+      const provider = (request.query.provider as 'allanime' | 'hianime' | 'animepahe') || 'hianime';
 
       if (!anilistId) {
         return reply.status(400).send({
           error: "Missing required path parameter: 'anilistId'.",
         });
       }
-      if (provider !== 'allanime' && provider !== 'hianime') {
+      if (provider !== 'allanime' && provider !== 'hianime' && provider !== 'animepahe') {
         return reply.status(400).send({
-          error: `Invalid provider ${provider} .Expected provider query paramater to be  'allanime' or 'hianime' `,
+          error: `Invalid provider ${provider} .Expected provider query paramater to be  'allanime' or 'hianime'or 'animepahe `,
         });
       }
 
