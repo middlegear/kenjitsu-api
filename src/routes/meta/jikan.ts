@@ -362,13 +362,12 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
         );
       } else if (episodeId.includes('allanime')) {
         result = await jikan.fetchAllAnimeProviderSources(episodeId, category as (typeof validCategories)[number]);
-      } else {
-        result = await jikan.fetchHianimeProviderSources(
-          episodeId,
-          category as (typeof validCategories)[number],
-          server as (typeof validServers)[number],
-        );
-      }
+      } else if (episodeId.includes('pahe')) {
+        result = await jikan.fetchAnimePaheProviderSources(episodeId, category as (typeof validCategories)[number]);
+      } else
+        return reply.status(400).send({
+          error: `Unsupported provider for episodeId: '${episodeId}' Fetch episodeId from provider episodes endpoint.`,
+        });
 
       if ('error' in result) {
         return reply.status(500).send(result);
