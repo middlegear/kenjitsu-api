@@ -244,25 +244,25 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
   );
 
   //// disabled intentionally
-  // fastify.get(
-  //   '/watch/:episodeId',
-  //   async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
-  //     reply.header('Cache-Control', 's-maxage=120, stale-while-revalidate=180');
+  fastify.get(
+    '/watch/:episodeId',
+    async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
+      // reply.header('Cache-Control', 's-maxage=120, stale-while-revalidate=180');
 
-  //     const episodeId = String(request.params.episodeId);
-  //     const category = (request.query.category as 'sub' | 'dub' | 'raw') || 'sub';
+      const episodeId = String(request.params.episodeId);
+      const category = (request.query.category as 'sub' | 'dub' | 'raw') || 'sub';
 
-  //     if (!episodeId) {
-  //       return reply.status(400).send({ error: 'Missing required params: EpisodeId' });
-  //     }
+      if (!episodeId) {
+        return reply.status(400).send({ error: 'Missing required params: EpisodeId' });
+      }
 
-  //     const result = await animekai.fetchSources(episodeId, category);
+      const result = await animekai.fetchSources(episodeId, category);
 
-  //     if ('error' in result) {
-  //       return reply.status(500).send(result);
-  //     }
+      if ('error' in result) {
+        return reply.status(500).send(result);
+      }
 
-  //     return reply.status(200).send(result);
-  //   },
-  // );
+      return reply.status(200).send(result);
+    },
+  );
 }
