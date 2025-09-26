@@ -210,7 +210,7 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
       const category = (request.query.category as 'sub' | 'dub' | 'raw') || 'sub';
 
       if (!episodeId) {
-        return reply.status(400).send({ error: 'Missing required params: EpisodeId' });
+        return reply.status(400).send({ error: 'Missing required params: episodeId' });
       }
 
       if (!['sub', 'dub', 'raw'].includes(category)) {
