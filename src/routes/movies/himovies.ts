@@ -18,7 +18,11 @@ export default async function HimoviesRoutes(fastify: FastifyInstance) {
     const result = await himovies.fetchHome();
 
     if ('error' in result) {
-      return reply.status(500).send(result);
+      return reply
+        .status(500)
+        .send(
+          `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+        );
     }
 
     if (result && Array.isArray(result.upcoming) && result.upcoming.length > 0) {
@@ -45,8 +49,13 @@ export default async function HimoviesRoutes(fastify: FastifyInstance) {
     const result = await himovies.search(q, page);
 
     if ('error' in result) {
-      return reply.status(500).send(result);
+      return reply
+        .status(500)
+        .send(
+          `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+        );
     }
+
     return reply.status(200).send(result);
   });
 
@@ -67,8 +76,13 @@ export default async function HimoviesRoutes(fastify: FastifyInstance) {
     const result = await himovies.searchSuggestions(q);
 
     if ('error' in result) {
-      return reply.status(500).send(result);
+      return reply
+        .status(500)
+        .send(
+          `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+        );
     }
+
     return reply.status(200).send(result);
   });
 
@@ -108,7 +122,11 @@ export default async function HimoviesRoutes(fastify: FastifyInstance) {
       const result = await himovies.advancedSearch(type, quality, genre, selectedCountry, page);
 
       if ('error' in result) {
-        return reply.status(500).send(result);
+        return reply
+          .status(500)
+          .send(
+            `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+          );
       }
 
       if (result && Array.isArray(result.data) && result.data.length > 0) {
@@ -139,7 +157,11 @@ export default async function HimoviesRoutes(fastify: FastifyInstance) {
       const result = await himovies.fetchMediaInfo(mediaId);
 
       if ('error' in result) {
-        return reply.status(500).send(result);
+        return reply
+          .status(500)
+          .send(
+            `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+          );
       }
 
       if (result && result.data !== null && Array.isArray(result.providerEpisodes) && result.providerEpisodes.length > 1) {
@@ -177,7 +199,11 @@ export default async function HimoviesRoutes(fastify: FastifyInstance) {
     type === 'movie' ? (result = await himovies.fetchPopularMovies(page)) : (result = await himovies.fetchPopularTv(page));
 
     if ('error' in result) {
-      return reply.status(500).send(result);
+      return reply
+        .status(500)
+        .send(
+          `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+        );
     }
 
     if (result && Array.isArray(result.data) && result.data.length > 0) {
@@ -212,7 +238,11 @@ export default async function HimoviesRoutes(fastify: FastifyInstance) {
     type === 'movie' ? (result = await himovies.fetchTopMovies(page)) : (result = await himovies.fetchTopTv(page));
 
     if ('error' in result) {
-      return reply.status(500).send(result);
+      return reply
+        .status(500)
+        .send(
+          `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+        );
     }
 
     if (result && Array.isArray(result.data) && result.data.length > 0) {
@@ -236,7 +266,11 @@ export default async function HimoviesRoutes(fastify: FastifyInstance) {
     const result = await himovies.fetchUpcoming(page);
 
     if ('error' in result) {
-      return reply.status(500).send(result);
+      return reply
+        .status(500)
+        .send(
+          `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+        );
     }
 
     if (result && Array.isArray(result.data) && result.data.length > 0) {
@@ -268,7 +302,11 @@ export default async function HimoviesRoutes(fastify: FastifyInstance) {
       const result = await himovies.fetchGenre(genre, page);
 
       if ('error' in result) {
-        return reply.status(500).send(result);
+        return reply
+          .status(500)
+          .send(
+            `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+          );
       }
 
       if (result && Array.isArray(result.data) && result.data.length > 0) {
@@ -300,8 +338,13 @@ export default async function HimoviesRoutes(fastify: FastifyInstance) {
       const result = await himovies.fetchByCountry(country, page);
 
       if ('error' in result) {
-        return reply.status(500).send(result);
+        return reply
+          .status(500)
+          .send(
+            `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+          );
       }
+
       if (result && Array.isArray(result.data) && result.data.length > 0) {
         await redisSetCache(cacheKey, result, 336);
       }
@@ -328,7 +371,11 @@ export default async function HimoviesRoutes(fastify: FastifyInstance) {
       const result = await himovies.fetchServers(episodeId);
 
       if ('error' in result) {
-        return reply.status(500).send(result);
+        return reply
+          .status(500)
+          .send(
+            `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+          );
       }
 
       if (result && Array.isArray(result.data) && result.data.length > 0) {
@@ -360,7 +407,11 @@ export default async function HimoviesRoutes(fastify: FastifyInstance) {
       const result = await himovies.fetchSources(episodeId, server);
 
       if ('error' in result) {
-        return reply.status(500).send(result);
+        return reply
+          .status(500)
+          .send(
+            `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+          );
       }
       return reply.status(200).send(result);
     },

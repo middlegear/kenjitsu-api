@@ -12,7 +12,11 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
     const result = await animekai.fetchHome();
 
     if ('error' in result) {
-      return reply.status(500).send(result);
+      return reply
+        .status(500)
+        .send(
+          `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues:${result}`,
+        );
     }
 
     return reply.status(200).send(result);
@@ -35,9 +39,15 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
     const page = Number(request.query.page) || 1;
 
     const result = await animekai.search(q, page);
+
     if ('error' in result) {
-      return reply.status(500).send(result);
+      return reply
+        .status(500)
+        .send(
+          `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+        );
     }
+
     return reply.status(200).send(result);
   });
 
@@ -56,7 +66,11 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
     const result = await animekai.fetchRecentlyUpdated(category, page);
 
     if ('error' in result) {
-      return reply.status(500).send(result);
+      return reply
+        .status(500)
+        .send(
+          `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+        );
     }
 
     return reply.status(200).send(result);
@@ -77,7 +91,11 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
     const result = await animekai.fetchRecentlyAdded(format, page);
 
     if ('error' in result) {
-      return reply.status(500).send(result);
+      return reply
+        .status(500)
+        .send(
+          `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+        );
     }
 
     return reply.status(200).send(result);
@@ -98,7 +116,11 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
     const result = await animekai.fetchRecentlyCompleted(format, page);
 
     if ('error' in result) {
-      return reply.status(500).send(result);
+      return reply
+        .status(500)
+        .send(
+          `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+        );
     }
 
     return reply.status(200).send(result);
@@ -120,7 +142,11 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
     const result = await animekai.fetchAnimeCategory(format, page);
 
     if ('error' in result) {
-      return reply.status(500).send(result);
+      return reply
+        .status(500)
+        .send(
+          `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+        );
     }
 
     return reply.status(200).send(result);
@@ -140,8 +166,13 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
     }
 
     const result = await animekai.fetchTopAiring(format, page);
+
     if ('error' in result) {
-      return reply.status(500).send(result);
+      return reply
+        .status(500)
+        .send(
+          `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+        );
     }
 
     return reply.status(200).send(result);
@@ -164,7 +195,11 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
       const result = await animekai.fetchGenres(genre, page);
 
       if ('error' in result) {
-        return reply.status(500).send(result);
+        return reply
+          .status(500)
+          .send(
+            `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+          );
       }
 
       return reply.status(200).send(result);
@@ -191,8 +226,13 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
     const result = await animekai.fetchAnimeInfo(animeId);
 
     if ('error' in result) {
-      return reply.status(500).send(result);
+      return reply
+        .status(500)
+        .send(
+          `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+        );
     }
+
     if (result.data !== null && Array.isArray(result.providerEpisodes) && result.providerEpisodes.length > 0) {
       result.data.status?.toLowerCase() === 'completed' ? (duration = 0) : (duration = 24);
 
@@ -221,7 +261,11 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
       const result = await animekai.fetchServers(episodeId, category);
 
       if ('error' in result) {
-        return reply.status(500).send(result);
+        return reply
+          .status(500)
+          .send(
+            `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+          );
       }
 
       return reply.status(200).send(result);
@@ -243,7 +287,11 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
       const result = await animekai.fetchSources(episodeId, category);
 
       if ('error' in result) {
-        return reply.status(500).send(result);
+        return reply
+          .status(500)
+          .send(
+            `Open an issue with steps to reproduce the error in this repo:https://github.com/middlegear/API/issues. ${result}`,
+          );
       }
 
       return reply.status(200).send(result);
