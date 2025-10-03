@@ -16,12 +16,24 @@ import { ratelimitOptions, rateLimitPlugIn } from './config/ratelimit.js';
 import fastifyCors, { corsOptions } from './config/cors.js';
 import { checkRedis } from './config/redis.js';
 
+import * as Sentry from '@sentry/node';
+
+Sentry.init({
+  dsn: 'https://ac50dff41768773817547c6a608e392d@o4509883128152064.ingest.de.sentry.io/4510126918467664',
+
+  enableLogs: true,
+
+  sendDefaultPii: true,
+});
+
 const app = Fastify({
   logger: { level: 'info' },
   routerOptions: {
     maxParamLength: 1000,
   },
 });
+
+Sentry.setupFastifyErrorHandler(app);
 async function FastifyApp() {
   checkRedis();
 
