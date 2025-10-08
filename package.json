@@ -1,7 +1,7 @@
 {
   "name": "hakai-api",
   "version": "1.0.0",
-  "description": "api serving anime, movies and tv.",
+  "description": "A lightweight API that serves metadata and video sources from popular streaming sites.",
   "main": "src/server.ts",
   "type": "module",
   "scripts": {
