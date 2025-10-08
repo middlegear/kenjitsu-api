@@ -25,11 +25,11 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
     q = decodeURIComponent(q);
     q = q.replace(/[^\w\s\-_.]/g, '');
 
-    if (q.length > 1000) {
-      return reply.status(400).send({ error: 'Query too long' });
-    }
     if (!q.length) {
-      return reply.status(400).send({ error: 'Query string cannot be empty' });
+      return reply.status(400).send({ error: "Missing required query params: 'q' " });
+    }
+    if (q.length > 1000) {
+      return reply.status(400).send({ error: 'query string too long' });
     }
 
     const page = Number(request.query.page) || 1;
