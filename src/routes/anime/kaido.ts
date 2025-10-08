@@ -429,7 +429,7 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
       }
       if (!['sub', 'dub', 'raw'].includes(category)) {
         return reply.status(400).send({
-          error: `Invalid category picked: '${category}'. Expected one of 'sub','dub','raw'.`,
+          error: `Invalid category picked: '${category}'. Expected one of 'sub','dub' or 'raw'.`,
         });
       }
       if (!['vidstreaming', 'vidcloud'].includes(server)) {

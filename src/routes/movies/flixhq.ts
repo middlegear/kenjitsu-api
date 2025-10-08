@@ -353,7 +353,7 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
       const validServers = ['vidcloud', 'akcloud', 'upcloud'] as const;
       if (!validServers.includes(server)) {
         return reply.status(400).send({
-          error: `Invalid server: '${server}'. Expected one of ${validServers.join(', ')}.`,
+          error: `Invalid streaming server selected: '${server}'. Pick one of these instead ${validServers.join(', ')}.`,
         });
       }
 
