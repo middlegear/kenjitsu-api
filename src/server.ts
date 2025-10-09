@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
+import events from 'events';
 
 import StaticRoutes from './routes/static.js';
 import AnimekaiRoutes from './routes/anime/animekai.js';
@@ -15,6 +16,8 @@ import TheMovieDatabaseRoutes from './routes/meta/tmdb.js';
 import { ratelimitOptions, rateLimitPlugIn } from './config/ratelimit.js';
 import fastifyCors, { corsOptions } from './config/cors.js';
 import { checkRedis } from './config/redis.js';
+
+events.defaultMaxListeners = 25;
 
 const app = Fastify({
   logger: { level: 'info' },
