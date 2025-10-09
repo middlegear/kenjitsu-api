@@ -22,7 +22,7 @@ export default async function StaticRoutes(fastify: FastifyInstance) {
     return reply.sendFile('index.html');
   });
 
-  // fastify.get('/favicon.ico', async (request: FastifyRequest, reply: FastifyReply) => {
-  //   return reply.redirect('/favicon.ico', 301);
-  // });
+  fastify.setNotFoundHandler(async (request: FastifyRequest, reply: FastifyReply) => {
+    return reply.sendFile('404.html');
+  });
 }

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kenjitsu</title>
+    <meta name="description"
+        content="A lightweight API that serves metadata and video sources from popular streaming sites." />
+    <link rel="icon" type="image/png"
+        href="https://m3jz13d05b.ufs.sh/f/dLgmbGNJLXergTlm0iNBd9DUIpQ3M8AnxaYRiXLJjg6oTlcb" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+
+            font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-image: url('https://m3jz13d05b.ufs.sh/f/dLgmbGNJLXer2ZI9oGAfuUKhr07ej8C9ZYnFAEbXMzdWVB4a');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            overflow-x: hidden;
+            position: relative;
+        }
+
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+
+            background: linear-gradient(135deg, rgba(12, 6, 19, 0.986) 0%, rgba(33, 5, 58, 0.8) 50%, rgba(0, 0, 0, 0.575) 100%);
+            pointer-events: none;
+        }
+
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 700px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-code {
+            font-size: 10rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #f6f4f8 0%, #ece9ee 50%, #d293f7e5 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            text-shadow: 0 4px 20px rgba(179, 110, 245, 0.6);
+            filter: drop-shadow(0 4px 20px rgba(168, 85, 247, 0.6));
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #eae0f3 0%, #bf8af8 50%, #e6cbf5e5 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            filter: drop-shadow(0 2px 10px rgba(177, 107, 243, 0.8));
+        }
+
+        p {
+            font-size: 1.3rem;
+            color: #f5f4f7e3;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            font-weight: 400;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+
+            display: inline-flex;
+            align-items: center;
+            padding: 0.8rem 1.6rem;
+            font-size: 1.3rem;
+            font-weight: 500;
+            text-decoration: none;
+            border-radius: 0.6rem;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3c1b5c 0%, #311546 100%);
+            color: #f4f3f7;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.288);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #431a69 0%, #31134e 100%);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+
+            background: linear-gradient(135deg, #200836 0%, #311546 100%);
+            color: #f2e9ff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #361455 0%, #401a66 100%);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .error-code {
+                font-size: 6rem;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+                padding: 0.5rem;
+            }
+
+            p {
+                font-size: 1.05rem;
+                padding: 0.4rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .btn {
+                font-size: 1.05rem;
+                padding: 0.8rem 1.6rem;
+            }
+
+            /* FIX 2 & 3: Better responsive button handling. */
+            /* Force the button group to stack vertically and center its contents */
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.8rem;
+                /* Vertical gap between stacked buttons */
+            }
+
+            /* Removed the problematic width: 100% and max-width: 300px on .btn in the media query */
+            /* .btn {
+                width: 100%;
+                max-width: 300px;
+            } */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="error-code">404</div>
+
+        <h1>Route Not Found</h1>
+        <p>
+            Congratulations! You've successfully navigated to the internet's equivalent of an empty parking space.
+        </p>
+
+        <div class="button-group">
+            <a href="/" class="btn btn-primary">Return Home</a>
+        </div>
+    </div>
+</body>
+
+</html>
