@@ -193,7 +193,12 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
     if ('error' in result) {
       return reply.status(500).send(result);
     }
-    if (result.data !== null && Array.isArray(result.providerEpisodes) && result.providerEpisodes.length > 0) {
+    if (
+      result.data !== null &&
+      Array.isArray(result.providerEpisodes) &&
+      result.providerEpisodes.length > 0 &&
+      result.data.type?.toLowerCase() !== 'movie'
+    ) {
       result.data.status?.toLowerCase() === 'completed' ? (duration = 0) : (duration = 1);
 
       await redisSetCache(cacheKey, result, duration);
