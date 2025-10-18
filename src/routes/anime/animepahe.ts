@@ -28,6 +28,19 @@ export default function AnimepaheRoutes(fastify: FastifyInstance) {
     return reply.status(200).send(result);
   });
 
+  fastify.get('/recent-episodes', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
+    reply.header('Cache-Control', `s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
+
+    const page = request.query.page || 1;
+
+    const result = await animepahe.fetchRecentlyUpdated(page);
+    if ('error' in result) {
+      return reply.status(500).send(result);
+    }
+
+    return reply.status(200).send(result);
+  });
+
   fastify.get('/info/:animeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${2 * 60 * 60}, stale-while-revalidate=300`);
 
