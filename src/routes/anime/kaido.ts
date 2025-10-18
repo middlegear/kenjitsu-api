@@ -79,7 +79,12 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
     if ('error' in result) {
       return reply.status(500).send(result);
     }
-    if (result && result.data !== null && result.providerEpisodes.length > 0) {
+    if (
+      result &&
+      result.data !== null &&
+      result.providerEpisodes.length > 0 &&
+      result.data.type?.toLowerCase() !== 'movie'
+    ) {
       result.data.status?.toLowerCase() === 'finished airing' ? (duration = 0) : (duration = 2);
       await redisSetCache(cacheKey, result, duration);
     }

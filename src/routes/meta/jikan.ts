@@ -399,7 +399,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
         return reply.status(500).send(result);
       }
 
-      if (result && result.data !== null && result.provider !== null) {
+      if (result && result.data !== null && result.provider !== null && result.data.format.toLowerCase() !== 'movie') {
         result.data.status.toLowerCase() === 'finished airing' ? (duration = 0) : (duration = 148);
         await redisSetCache(cacheKey, result, duration);
       }
@@ -439,7 +439,13 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       if ('error' in result) {
         return reply.status(500).send(result);
       }
-      if (result && result.data !== null && Array.isArray(result.providerEpisodes) && result.providerEpisodes.length > 0) {
+      if (
+        result &&
+        result.data !== null &&
+        Array.isArray(result.providerEpisodes) &&
+        result.providerEpisodes.length > 0 &&
+        result.data.format.toLowerCase() !== 'movie'
+      ) {
         result.data.status.toLowerCase() === 'finished airing' ? (duration = 0) : (duration = 2);
         await redisSetCache(cacheKey, result, duration);
       }
