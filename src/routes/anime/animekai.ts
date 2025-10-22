@@ -3,7 +3,7 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { IAMetaFormatArr, IAnimeCategoryArr, type FastifyParams, type FastifyQuery } from '../../utils/types.js';
 import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
 
-const animekai = new Animekai();
+const animekai = new Animekai('https://animekai.to');
 
 export default async function AnimekaiRoutes(fastify: FastifyInstance) {
   fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -191,10 +191,7 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
     const result = await animekai.fetchAnimeInfo(animeId);
 
     if ('error' in result) {
-      return reply.status(500).send({
-        error: result.error,
-        message: 'Open issue here and describe errors here: https://github.com/middlegear/kenjitsu-api/issues',
-      });
+      return reply.status(500).send(result);
     }
     if (
       result.data !== null &&
@@ -265,10 +262,7 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
       const result = await animekai.fetchSources(episodeId, category, server);
 
       if ('error' in result) {
-        return reply.status(500).send({
-          error: result.error,
-          message: 'Open issue here and describe errors here: https://github.com/middlegear/kenjitsu-api/issues.',
-        });
+        return reply.status(500).send(result);
       }
 
       return reply.status(200).send(result);
