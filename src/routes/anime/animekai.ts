@@ -191,7 +191,10 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
     const result = await animekai.fetchAnimeInfo(animeId);
 
     if ('error' in result) {
-      return reply.status(500).send(result);
+      return reply.status(500).send({
+        error: result.error,
+        message: 'Open issue here and describe errors here: https://github.com/middlegear/kenjitsu-api/issues',
+      });
     }
     if (
       result.data !== null &&
@@ -262,7 +265,10 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
       const result = await animekai.fetchSources(episodeId, category, server);
 
       if ('error' in result) {
-        return reply.status(500).send(result);
+        return reply.status(500).send({
+          error: result.error,
+          message: 'Open issue here and describe errors here: https://github.com/middlegear/kenjitsu-api/issues.',
+        });
       }
 
       return reply.status(200).send(result);

@@ -6,10 +6,10 @@
   "type": "module",
   "scripts": {
     "start": "node dist/server.js",
-    "commit": "cz",
+    "commit": "tsc && cz ",
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
-    "lint": "tsc --noEmit"
+    "lint": "tsc"
   },
   "repository": {
     "type": "git",
