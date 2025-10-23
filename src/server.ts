@@ -22,7 +22,7 @@ events.defaultMaxListeners = 25;
 
 const app = Fastify({
   logger: {
-    level: 'error',
+    level: 'info',
     serializers: {
       req: req => ({
         method: req.method,
@@ -49,10 +49,9 @@ const app = Fastify({
 });
 
 async function FastifyApp() {
-  checkRedis();
-
   app.register(rateLimitPlugIn, ratelimitOptions);
 
+  await checkRedis();
   await app.register(fastifyCors, corsOptions);
   await app.register(StaticRoutes);
   await app.register(AnilistRoutes, { prefix: '/api/anilist' });

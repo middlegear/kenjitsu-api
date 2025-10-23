@@ -8,13 +8,18 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
   fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
 
-    const result = await zoro.fetchHome();
+    try {
+      const result = await zoro.fetchHome();
+      if ('error' in result) {
+        request.log.error({ result }, `External API Error: Failed to fetch home data`);
+        return reply.status(500).send(result);
+      }
 
-    if ('error' in result) {
-      return reply.status(500).send(result);
+      return reply.status(200).send(result);
+    } catch (error) {
+      request.log.error({ error: error }, `Internal runtime error occured while fetching home data`);
+      return reply.status(500).send({ error: `Internal server error occured: ${error}` });
     }
-
-    return reply.status(200).send(result);
   });
 
   fastify.get('/search', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
@@ -32,13 +37,19 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
 
     const page = Number(request.query.page) || 1;
 
-    const result = await zoro.search(q, page);
+    try {
+      const result = await zoro.search(q, page);
 
-    if ('error' in result) {
-      return reply.status(500).send(result);
+      if ('error' in result) {
+        request.log.error({ result, q, page }, `External API Error: Failed to fetch search results for query:${q}`);
+        return reply.status(500).send(result);
+      }
+
+      return reply.status(200).send(result);
+    } catch (error) {
+      request.log.error({ error: error }, `Internal runtime error occured while querying search results`);
+      return reply.status(500).send({ error: `Internal server error occured: ${error}` });
     }
-
-    return reply.status(200).send(result);
   });
 
   fastify.get('/suggestions', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
@@ -55,11 +66,19 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
       return reply.status(400).send({ error: 'query string too long' });
     }
 
-    const result = await zoro.searchSuggestions(q);
-    if ('error' in result) {
-      return reply.status(500).send(result);
+    try {
+      const result = await zoro.searchSuggestions(q);
+
+      if ('error' in result) {
+        request.log.error({ result, q }, `External API Error: Failed to fetch searchsuggestions  results for query:${q}`);
+        return reply.status(500).send(result);
+      }
+
+      return reply.status(200).send(result);
+    } catch (error) {
+      request.log.error({ error: error }, `Internal runtime error occured while querying searchsuggestions results`);
+      return reply.status(500).send({ error: `Internal server error occured: ${error}` });
     }
-    return reply.status(200).send(result);
   });
 
   fastify.get('/info/:animeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
@@ -75,20 +94,26 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
       return reply.status(200).send(cachedData);
     }
 
-    const result = await zoro.fetchAnimeInfo(animeId);
-    if ('error' in result) {
-      return reply.status(500).send(result);
+    try {
+      const result = await zoro.fetchAnimeInfo(animeId);
+      if ('error' in result) {
+        request.log.error({ result, animeId }, `External API Error: Failed to fetch animeinfo `);
+        return reply.status(500).send(result);
+      }
+      if (
+        result &&
+        result.data !== null &&
+        result.providerEpisodes.length > 0 &&
+        result.data.type?.toLowerCase() !== 'movie'
+      ) {
+        result.data.status?.toLowerCase() === 'finished airing' ? (duration = 0) : (duration = 2);
+        await redisSetCache(cacheKey, result, duration);
+      }
+      return reply.status(200).send(result);
+    } catch (error) {
+      request.log.error({ error: error }, `Internal runtime error occured while fetching animeinfo`);
+      return reply.status(500).send({ error: `Internal server error occured: ${error}` });
     }
-    if (
-      result &&
-      result.data !== null &&
-      result.providerEpisodes.length > 0 &&
-      result.data.type?.toLowerCase() !== 'movie'
-    ) {
-      result.data.status?.toLowerCase() === 'finished airing' ? (duration = 0) : (duration = 2);
-      await redisSetCache(cacheKey, result, duration);
-    }
-    return reply.status(200).send(result);
   });
 
   fastify.get('/top-airing', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
@@ -101,16 +126,23 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
     if (cachedData) {
       return reply.status(200).send(cachedData);
     }
-    const result = await zoro.fetchTopAiring(page);
 
-    if ('error' in result) {
-      return reply.status(500).send(result);
-    }
+    try {
+      const result = await zoro.fetchTopAiring(page);
 
-    if (result && Array.isArray(result.data) && result.data.length > 0) {
-      await redisSetCache(cacheKey, result, 24);
+      if ('error' in result) {
+        request.log.error({ result, page }, `External API Error: Failed to fetch top airing anime `);
+        return reply.status(500).send(result);
+      }
+
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 24);
+      }
+      return reply.status(200).send(result);
+    } catch (error) {
+      request.log.error({ error: error }, `Internal runtime error occured while fetching top airing anime`);
+      return reply.status(500).send({ error: `Internal server error occured: ${error}` });
     }
-    return reply.status(200).send(result);
   });
 
   fastify.get('/favourites', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
@@ -124,15 +156,22 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
     if (cachedData) {
       return reply.status(200).send(cachedData);
     }
-    const result = await zoro.fetchMostFavourites(page);
-    if ('error' in result) {
-      return reply.status(500).send(result);
-    }
 
-    if (result && Array.isArray(result.data) && result.data.length > 0) {
-      await redisSetCache(cacheKey, result, 168);
+    try {
+      const result = await zoro.fetchMostFavourites(page);
+      if ('error' in result) {
+        request.log.error({ result, page }, `External API Error: Failed to fetch favourite anime`);
+        return reply.status(500).send(result);
+      }
+
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 168);
+      }
+      return reply.status(200).send(result);
+    } catch (error) {
+      request.log.error({ error: error }, `Internal runtime error occured while fetching favourite anime`);
+      return reply.status(500).send({ error: `Internal server error occured: ${error}` });
     }
-    return reply.status(200).send(result);
   });
 
   fastify.get('/most-popular', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
@@ -145,15 +184,21 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
     if (cachedData) {
       return reply.status(200).send(cachedData);
     }
-    const result = await zoro.fetchMostPopular(page);
-    if ('error' in result) {
-      return reply.status(500).send(result);
-    }
+    try {
+      const result = await zoro.fetchMostPopular(page);
+      if ('error' in result) {
+        request.log.error({ result, page }, `External API Error: Failed to fetch popular anime`);
+        return reply.status(500).send(result);
+      }
 
-    if (result && Array.isArray(result.data) && result.data.length > 0) {
-      await redisSetCache(cacheKey, result, 168);
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 720);
+      }
+      return reply.status(200).send(result);
+    } catch (error) {
+      request.log.error({ error: error }, `Internal runtime error occured while fetching popular anime`);
+      return reply.status(500).send({ error: `Internal server error occured: ${error}` });
     }
-    return reply.status(200).send(result);
   });
 
   fastify.get('/recently-completed', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
@@ -167,15 +212,21 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
       return reply.status(200).send(cachedData);
     }
 
-    const result = await zoro.fetchRecentlyCompleted(page);
+    try {
+      const result = await zoro.fetchRecentlyCompleted(page);
 
-    if ('error' in result) {
-      return reply.status(500).send(result);
+      if ('error' in result) {
+        request.log.error({ result, page }, `External API Error: Failed to fetch recently completed  anime`);
+        return reply.status(500).send(result);
+      }
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 24);
+      }
+      return reply.status(200).send(result);
+    } catch (error) {
+      request.log.error({ error: error }, `Internal runtime error occured while fetching recently completed anime`);
+      return reply.status(500).send({ error: `Internal server error occured: ${error}` });
     }
-    if (result && Array.isArray(result.data) && result.data.length > 0) {
-      await redisSetCache(cacheKey, result, 24);
-    }
-    return reply.status(200).send(result);
   });
 
   fastify.get('/recently-updated', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
@@ -189,16 +240,21 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
       return reply.status(200).send(cachedData);
     }
 
-    const result = await zoro.fetchRecentlyUpdated(page);
+    try {
+      const result = await zoro.fetchRecentlyUpdated(page);
 
-    if ('error' in result) {
-      return reply.status(500).send(result);
+      if ('error' in result) {
+        request.log.error({ result, page }, `External API Error: Failed to fetch recently updated anime`);
+        return reply.status(500).send(result);
+      }
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 1);
+      }
+      return reply.status(200).send(result);
+    } catch (error) {
+      request.log.error({ error: error }, `Internal runtime error occured while fetching recently updated anime`);
+      return reply.status(500).send({ error: `Internal server error occured: ${error}` });
     }
-
-    if (result && Array.isArray(result.data) && result.data.length > 0) {
-      await redisSetCache(cacheKey, result, 1);
-    }
-    return reply.status(200).send(result);
   });
 
   fastify.get('/recently-added', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
@@ -212,16 +268,22 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
       return reply.status(200).send(cachedData);
     }
 
-    const result = await zoro.fetchRecentlyAdded(page);
+    try {
+      const result = await zoro.fetchRecentlyAdded(page);
 
-    if ('error' in result) {
-      return reply.status(500).send(result);
-    }
+      if ('error' in result) {
+        request.log.error({ result, page }, `External API Error: Failed to fetch recently added anime`);
+        return reply.status(500).send(result);
+      }
 
-    if (result && Array.isArray(result.data) && result.data.length > 0) {
-      await redisSetCache(cacheKey, result, 1);
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 1);
+      }
+      return reply.status(200).send(result);
+    } catch (error) {
+      request.log.error({ error: error }, `Internal runtime error occured while fetching recently added anime`);
+      return reply.status(500).send({ error: `Internal server error occured: ${error}` });
     }
-    return reply.status(200).send(result);
   });
 
   fastify.get(
@@ -239,16 +301,22 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
         return reply.status(200).send(cachedData);
       }
 
-      const result = await zoro.fetchAtoZList(sort, page);
+      try {
+        const result = await zoro.fetchAtoZList(sort, page);
 
-      if ('error' in result) {
-        return reply.status(500).send(result);
-      }
+        if ('error' in result) {
+          request.log.error({ result, sort, page }, `External API Error: Failed to fetch sorted alphabetical animelist`);
+          return reply.status(500).send(result);
+        }
 
-      if (result && Array.isArray(result.data) && result.data.length > 0) {
-        await redisSetCache(cacheKey, result, 168);
+        if (result && Array.isArray(result.data) && result.data.length > 0) {
+          await redisSetCache(cacheKey, result, 168);
+        }
+        return reply.status(200).send(result);
+      } catch (error) {
+        request.log.error({ error: error }, `Internal runtime error occured while fetching alphabetical animelist`);
+        return reply.status(500).send({ error: `Internal server error occured: ${error}` });
       }
-      return reply.status(200).send(result);
     },
   );
 
@@ -263,15 +331,21 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
       return reply.status(200).send(cachedData);
     }
 
-    const result = await zoro.fetchSubbedAnime(page);
+    try {
+      const result = await zoro.fetchSubbedAnime(page);
 
-    if ('error' in result) {
-      return reply.status(500).send(result);
+      if ('error' in result) {
+        request.log.error({ result, page }, `External API Error: Failed to fetch subbed animelist`);
+        return reply.status(500).send(result);
+      }
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 168);
+      }
+      return reply.status(200).send(result);
+    } catch (error) {
+      request.log.error({ error: error }, `Internal runtime error occured while fetching subbed animelist`);
+      return reply.status(500).send({ error: `Internal server error occured: ${error}` });
     }
-    if (result && Array.isArray(result.data) && result.data.length > 0) {
-      await redisSetCache(cacheKey, result, 168);
-    }
-    return reply.status(200).send(result);
   });
 
   fastify.get('/dubbed', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
@@ -285,15 +359,21 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
       return reply.status(200).send(cachedData);
     }
 
-    const result = await zoro.fetchDubbedAnime(page);
+    try {
+      const result = await zoro.fetchDubbedAnime(page);
 
-    if ('error' in result) {
-      return reply.status(500).send(result);
+      if ('error' in result) {
+        request.log.error({ result, page }, `External API Error: Failed to fetch dubbed animelist`);
+        return reply.status(500).send(result);
+      }
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 168);
+      }
+      return reply.status(200).send(result);
+    } catch (error) {
+      request.log.error({ error: error }, `Internal runtime error occured while fetching dubbed animelist`);
+      return reply.status(500).send({ error: `Internal server error occured: ${error}` });
     }
-    if (result && Array.isArray(result.data) && result.data.length > 0) {
-      await redisSetCache(cacheKey, result, 168);
-    }
-    return reply.status(200).send(result);
   });
 
   fastify.get('/category', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
@@ -319,15 +399,21 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
       return reply.status(200).send(cachedData);
     }
 
-    const result = await zoro.fetchAnimeCategory(format, page);
-    if ('error' in result) {
-      return reply.status(500).send(result);
-    }
+    try {
+      const result = await zoro.fetchAnimeCategory(format, page);
+      if ('error' in result) {
+        request.log.error({ result, page, format }, `External API Error: Failed to fetch category animelist`);
+        return reply.status(500).send(result);
+      }
 
-    if (result && Array.isArray(result.data) && result.data.length > 0) {
-      await redisSetCache(cacheKey, result, 168);
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 168);
+      }
+      return reply.status(200).send(result);
+    } catch (error) {
+      request.log.error({ error: error }, `Internal runtime error occured while fetching category animelist`);
+      return reply.status(500).send({ error: `Internal server error occured: ${error}` });
     }
-    return reply.status(200).send(result);
   });
 
   fastify.get(
@@ -349,16 +435,22 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
         return reply.status(200).send(cachedData);
       }
 
-      const result = await zoro.fetchGenre(genre, page);
+      try {
+        const result = await zoro.fetchGenre(genre, page);
 
-      if ('error' in result) {
-        return reply.status(500).send(result);
-      }
+        if ('error' in result) {
+          request.log.error({ result, page, genre }, `External API Error: Failed to fetch genre list`);
+          return reply.status(500).send(result);
+        }
 
-      if (result && Array.isArray(result.data) && result.data.length > 0) {
-        await redisSetCache(cacheKey, result, 168);
+        if (result && Array.isArray(result.data) && result.data.length > 0) {
+          await redisSetCache(cacheKey, result, 168);
+        }
+        return reply.status(200).send(result);
+      } catch (error) {
+        request.log.error({ error: error }, `Internal runtime error occured while fetching genre list`);
+        return reply.status(500).send({ error: `Internal server error occured: ${error}` });
       }
-      return reply.status(200).send(result);
     },
   );
 
@@ -378,16 +470,23 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
         error: "Missing required path parameter: 'animeId'.",
       });
     }
-    const result = await zoro.fetchEpisodes(animeId);
 
-    if ('error' in result) {
-      return reply.status(500).send(result);
-    }
+    try {
+      const result = await zoro.fetchEpisodes(animeId);
 
-    if (result && Array.isArray(result.data) && result.data.length > 0) {
-      await redisSetCache(cacheKey, result, 2);
+      if ('error' in result) {
+        request.log.error({ result, animeId }, `External API Error: Failed to fetch episode list`);
+        return reply.status(500).send(result);
+      }
+
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 1);
+      }
+      return reply.status(200).send(result);
+    } catch (error) {
+      request.log.error({ error: error }, `Internal runtime error occured while fetching episode list`);
+      return reply.status(500).send({ error: `Internal server error occured: ${error}` });
     }
-    return reply.status(200).send(result);
   });
 
   fastify.get('/servers/:episodeId', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
@@ -405,17 +504,23 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
       return reply.status(200).send(cachedData);
     }
 
-    const result = await zoro.fetchServers(episodeId);
+    try {
+      const result = await zoro.fetchServers(episodeId);
 
-    if ('error' in result) {
-      return reply.status(500).send(result);
+      if ('error' in result) {
+        request.log.error({ result, episodeId }, `External API Error: Failed to fetch server list`);
+        return reply.status(500).send(result);
+      }
+
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 24);
+      }
+
+      return reply.status(200).send(result);
+    } catch (error) {
+      request.log.error({ error: error }, `Internal runtime error occured while fetching server list`);
+      return reply.status(500).send({ error: `Internal server error occured: ${error}` });
     }
-
-    if (result && Array.isArray(result.data) && result.data.length > 0) {
-      await redisSetCache(cacheKey, result, 6);
-    }
-
-    return reply.status(200).send(result);
   });
 
   fastify.get(
@@ -442,12 +547,18 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
           error: `Invalid  streaming server selected: '${server}'. Expected one of 'vidcloud' or 'vidstreaming'.`,
         });
       }
-      const result = await zoro.fetchSources(episodeId, 'vidcloud', category);
+      try {
+        const result = await zoro.fetchSources(episodeId, server, category);
 
-      if ('error' in result) {
-        return reply.status(500).send(result);
+        if ('error' in result) {
+          request.log.error({ result, episodeId, server, category }, `External API Error: Failed to fetch sources`);
+          return reply.status(500).send(result);
+        }
+        return reply.status(200).send(result);
+      } catch (error) {
+        request.log.error({ error: error }, `Internal runtime error occured while fetching sources`);
+        return reply.status(500).send({ error: `Internal server error occured: ${error}` });
       }
-      return reply.status(200).send(result);
     },
   );
 }

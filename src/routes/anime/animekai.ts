@@ -42,7 +42,7 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
       }
       return reply.status(200).send(result);
     } catch (error) {
-      request.log.error({ error: error }, `Internal runtime error occured while querying search`);
+      request.log.error({ error: error }, `Internal runtime error occured while querying search results`);
       return reply.status(500).send({ error: `Internal server error occured: ${error}` });
     }
   });

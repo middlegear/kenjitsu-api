@@ -1,30 +1,46 @@
-import 'dotenv';
+import 'dotenv/config';
 import { Redis } from 'ioredis';
 
 const port = Number(process.env.REDIS_PORT);
 const host = process.env.REDIS_HOST;
 const password = process.env.REDIS_PASSWORD;
 
-const isRedisEnabled = host && password;
+const isRedisEnabled = Boolean(host && password);
 
-export const redis = isRedisEnabled
-  ? new Redis({
-      host: host,
-      port: port,
-      password: password,
+let redisInstance: Redis | null = null;
+
+function initRedis() {
+  if (!isRedisEnabled) return null;
+  if (!redisInstance) {
+    redisInstance = new Redis({
+      host,
+      port,
+      password,
       tls: {},
-    })
-  : null;
+      lazyConnect: true,
+      maxRetriesPerRequest: 3,
+      enableReadyCheck: true,
+    });
+
+    redisInstance.on('connect', () => console.log('🟢 Redis connected'));
+    redisInstance.on('error', err => console.error('🔴 Redis error:', err.message));
+    redisInstance.on('end', () => console.log('🟡 Redis connection closed'));
+  }
+  return redisInstance;
+}
+
+export const redis = initRedis();
 
 export async function checkRedis() {
   if (!redis) {
-    console.log('❌ Redis is disabled (missing environment variables).');
+    console.warn('❌ Redis is disabled (missing environment variables).');
     return;
   }
 
   try {
-    const pong = await redis.ping();
-    console.log('✅ Redis Connection Successful', pong);
+    if (!redis.status || redis.status === 'end') {
+      await redis.connect();
+    }
   } catch (err) {
     console.error('❌ Redis Connection Failed:', err);
   }
