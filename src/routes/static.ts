@@ -24,10 +24,9 @@ export default async function StaticRoutes(fastify: FastifyInstance) {
 
   fastify.setNotFoundHandler(async (request: FastifyRequest, reply: FastifyReply) => {
     // return reply.status(404).sendFile('404.html');
-    return reply
-      .status(404)
-      .send({
-        message: 'This API has been overhauled to be more RESTful.Visit docs here:https://kenjitsu-docs.vercel.app/',
-      });
+    return reply.status(404).send({
+      message:
+        'This API has been overhauled to be more RESTful and better scaling.Visit docs here:https://kenjitsu-docs.vercel.app/',
+    });
   });
 }
