@@ -34,7 +34,7 @@ export default async function AnimepaheRoutes(fastify: FastifyInstance) {
     const page = request.query.page || 1;
 
     try {
-      const result = await animepahe.fetchRecentlyUpdated(page);
+      const result = await animepahe.fetchRecentEpisodes(page);
       if ('error' in result) {
         request.log.error({ result, page }, `External API Error: Failed to fetch recent episodes results`);
         return reply.status(500).send(result);

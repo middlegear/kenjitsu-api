@@ -33,11 +33,11 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Search media
   fastify.get('/media/search', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
 
     const { q, page = 1 } = request.query;
+
     if (!q) return reply.status(400).send({ error: "Missing required query param: 'q'" });
     if (q.length > 1000) return reply.status(400).send({ error: 'Query string too long' });
 
@@ -55,11 +55,11 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Get search suggestions
   fastify.get('/media/suggestions', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
 
     const q = request.query.q;
+
     if (!q) return reply.status(400).send({ error: "Missing required query param: 'q'" });
     if (q.length > 1000) return reply.status(400).send({ error: 'Query string too long' });
     try {
@@ -69,6 +69,7 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
         request.log.error({ result, q }, `External API Error: Failed to fetch search results.`);
         return reply.status(500).send(result);
       }
+
       return reply.status(200).send(result);
     } catch (error) {
       request.log.error({ error: error }, `Internal runtime error occurred while querying search results`);
@@ -76,7 +77,6 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Get movies (popular, top-rated)
   fastify.get(
     '/movies/category/:category',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
@@ -88,7 +88,13 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
       const validCategories = ['popular', 'top-rated'] as const;
       if (!validCategories.includes(category)) {
         return reply.status(400).send({
-          error: `Invalid sort: '${category}'. Expected one of ${validCategories.join(', ')}.`,
+          error: `Invalid category: '${category}'. Expected one of ${validCategories.join(', ')}.`,
+        });
+      }
+
+      if (!category) {
+        return reply.status(400).send({
+          error: `Missing required path parameter: 'category'.`,
         });
       }
 
@@ -137,7 +143,13 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
       const validCategories = ['popular', 'top-rated'] as const;
       if (!validCategories.includes(category)) {
         return reply.status(400).send({
-          error: `Invalid sort: '${category}'. Expected one of ${validCategories.join(', ')}.`,
+          error: `Invalid category: '${category}'. Expected one of ${validCategories.join(', ')}.`,
+        });
+      }
+
+      if (!category) {
+        return reply.status(400).send({
+          error: `Missing required path parameter: 'category'.`,
         });
       }
 
@@ -210,11 +222,12 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
       reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
 
-      const genre = request.query.genre as IMovieGenre | 'all' | undefined;
-      const country = request.query.country as IMovieCountry | undefined;
+      const genre = request.query.genre || 'all';
+      const country = request.query.country || 'all';
       const type = (request.query.type as 'movie' | 'tv' | 'all') || 'all';
       const quality = (request.query.quality as 'all' | 'HD' | 'SD' | 'CAM') || 'all';
-      const page = Number(request.query.page) || 1;
+      const page = request.query.page || 1;
+      const year = request.query.year || 'all';
 
       const validTypes = ['movie', 'tv', 'all'] as const;
       if (!validTypes.includes(type)) {
@@ -230,16 +243,14 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
         });
       }
 
-      const selectedCountry = country || 'all';
-
-      const cacheKey = `flix-advanced-search-${type}-${quality}-${genre}-${selectedCountry}-${page}`;
+      const cacheKey = `flix-advanced-search-${type}-${quality}-${genre}-${year}-${country}-${page}`;
       const cachedData = await redisGetCache(cacheKey);
       if (cachedData) {
         return reply.status(200).send(cachedData);
       }
 
       try {
-        const result = await flixhq.advancedSearch(type, quality, genre, selectedCountry, page);
+        const result = await flixhq.advancedSearch(type, quality, genre, country, year, page);
 
         if ('error' in result) {
           request.log.error({ result }, `External API Error.`);
@@ -257,7 +268,6 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
     },
   );
 
-  // Get media details
   fastify.get(
     '/media/:id',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
@@ -300,7 +310,7 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
       reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
-      const genre = request.params.genre as IMovieGenre | undefined;
+      const genre = request.params.genre;
       const page = request.query.page || 1;
 
       if (!genre) {
@@ -340,7 +350,7 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
       reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
       const page = request.query.page || 1;
-      const country = request.params.country as IMovieCountry;
+      const country = request.params.country;
 
       if (!country) {
         return reply.status(400).send({
@@ -421,7 +431,7 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
       const validServers = ['vidcloud', 'akcloud', 'upcloud'] as const;
       if (!validServers.includes(server)) {
         return reply.status(400).send({
-          error: `Invalid streaming server selected: '${server}'. Pick one of these instead ${validServers.join(', ')}. You are gay if you can't read the docs`,
+          error: `Invalid streaming server selected: '${server}'. Pick one of these instead ${validServers.join(', ')}.`,
         });
       }
 

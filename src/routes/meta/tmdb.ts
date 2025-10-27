@@ -7,19 +7,22 @@ import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
 const tmdb = new TheMovieDatabase();
 
 export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
-  // Search movies or TV shows
   fastify.get('/movies/search', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${168 * 60 * 60}, stale-while-revalidate=300`);
+
     const { q, page = 1 } = request.query;
+
     if (!q) return reply.status(400).send({ error: "Missing required query param: 'q'" });
     if (q.length > 1000) return reply.status(400).send({ error: 'Query string too long' });
 
     try {
       const result = await tmdb.searchMovie(q, page);
+
       if ('error' in result) {
         request.log.error({ result, q, page }, `External API Error: Failed to fetch search results`);
         return reply.status(500).send(result);
       }
+
       return reply.status(200).send(result);
     } catch (error) {
       request.log.error({ error }, `Internal runtime error occurred while querying search results`);
@@ -30,15 +33,18 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
   fastify.get('/tv/search', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${168 * 60 * 60}, stale-while-revalidate=300`);
     const { q, page = 1 } = request.query;
+
     if (!q) return reply.status(400).send({ error: "Missing required query param: 'q'" });
     if (q.length > 1000) return reply.status(400).send({ error: 'Query string too long' });
 
     try {
       const result = await tmdb.searchShows(q, page);
+
       if ('error' in result) {
         request.log.error({ result, q, page }, `External API Error: Failed to fetch search results`);
         return reply.status(500).send(result);
       }
+
       return reply.status(200).send(result);
     } catch (error) {
       request.log.error({ error }, `Internal runtime error occurred while querying search results`);
@@ -54,17 +60,25 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
       const page = request.query.page || 1;
       const category = request.params.category as 'popular' | 'top-rated' | 'releasing';
 
+      if (!category) {
+        return reply.status(400).send({
+          error: `Missing required path parameter: 'category'.`,
+        });
+      }
+
       if (category !== 'popular' && category !== 'top-rated' && category !== 'releasing') {
         return reply
           .status(400)
           .send({ error: `Invalid category: '${category}'. Expected 'popular' , 'top-rated' or 'releasing' ` });
       }
+
       const cacheKey = `tmdb-${category}-movie-${page}`;
       const cachedData = await redisGetCache(cacheKey);
       if (cachedData) return reply.status(200).send(cachedData);
 
       try {
         let result;
+
         switch (category) {
           case 'popular':
             result = await tmdb.fetchPopularMovies(page);
@@ -82,9 +96,13 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
           request.log.error({ result, page, category }, `External API Error: Failed to fetch ${category} movies`);
           return reply.status(500).send(result);
         }
+
         if (result && Array.isArray(result.data) && result.data.length > 0) {
-          await redisSetCache(cacheKey, result, 168);
+          let duration;
+          category === 'releasing' ? (duration = 12) : (duration = 168);
+          await redisSetCache(cacheKey, result, duration);
         }
+
         return reply.status(200).send(result);
       } catch (error) {
         request.log.error({ error, page, category }, `Internal runtime error occurred while fetching ${category} movies`);
@@ -100,6 +118,12 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
 
       const page = request.query.page || 1;
       const category = request.params.category as 'popular' | 'top-rated' | 'airing';
+
+      if (!category) {
+        return reply.status(400).send({
+          error: `Missing required path parameter: 'category'.`,
+        });
+      }
 
       if (category !== 'popular' && category !== 'top-rated' && category !== 'airing') {
         return reply
@@ -125,12 +149,16 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
             result = await tmdb.fetchAiringTv(page);
             break;
         }
+
         if ('error' in result) {
           request.log.error({ result, page, category }, `External API Error: Failed to fetch ${category} tv`);
           return reply.status(500).send(result);
         }
+
         if (result && Array.isArray(result.data) && result.data.length > 0) {
-          await redisSetCache(cacheKey, result, 168);
+          let duration;
+          category === 'airing' ? (duration = 12) : (duration = 168);
+          await redisSetCache(cacheKey, result, duration);
         }
         return reply.status(200).send(result);
       } catch (error) {
@@ -140,11 +168,15 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
     },
   );
 
-  // Get movie or TV show details
   fastify.get('/movies/:id', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
 
     const id = request.params.id;
+
+    if (!id) {
+      return reply.status(400).send({ error: 'Missing required path parameter: id' });
+    }
+
     const cacheKey = `tmdb-media-info-movie-${id}`;
     const cachedData = await redisGetCache(cacheKey);
     if (cachedData) return reply.status(200).send(cachedData);
@@ -169,6 +201,11 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
     reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
 
     const id = request.params.id;
+
+    if (!id) {
+      return reply.status(400).send({ error: 'Missing required path parameter: id' });
+    }
+
     const cacheKey = `tmdb-media-info-tv-${id}`;
     const cachedData = await redisGetCache(cacheKey);
     if (cachedData) return reply.status(200).send(cachedData);
@@ -193,19 +230,26 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
 
     const id = request.params.id;
 
+    if (!id) {
+      return reply.status(400).send({ error: 'Missing required path parameter: id' });
+    }
+
     const cacheKey = `tmdb-provider-id-movie-${id}`;
     const cachedData = await redisGetCache(cacheKey);
     if (cachedData) return reply.status(200).send(cachedData);
 
     try {
       const result = await tmdb.fetchMovieProviderId(Number(id));
+
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch provider info`);
         return reply.status(500).send(result);
       }
+
       if (result && result.data !== null && result.provider !== null) {
         await redisSetCache(cacheKey, result, 168);
       }
+
       return reply.status(200).send(result);
     } catch (error) {
       request.log.error({ error }, `Internal runtime error occurred while fetching provider info`);
@@ -218,19 +262,26 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
 
     const id = request.params.id;
 
+    if (!id) {
+      return reply.status(400).send({ error: 'Missing required path parameter: id' });
+    }
+
     const cacheKey = `tmdb-provider-id-tv-${id}`;
     const cachedData = await redisGetCache(cacheKey);
     if (cachedData) return reply.status(200).send(cachedData);
 
     try {
       const result = await tmdb.fetchTvProviderId(Number(id));
+
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch provider info`);
         return reply.status(500).send(result);
       }
+
       if (result && result.data !== null && result.provider !== null) {
         await redisSetCache(cacheKey, result, 168);
       }
+
       return reply.status(200).send(result);
     } catch (error) {
       request.log.error({ error }, `Internal runtime error occurred while fetching provider info`);
@@ -238,7 +289,6 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Get trending movies or TV shows
   fastify.get('/movies/trending', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
@@ -250,18 +300,22 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
     }
     const duration = timeWindow === 'week' ? 168 : 24;
     const cacheKey = `tmdb-trending-movie-${page}`;
+
     const cachedData = await redisGetCache(cacheKey);
     if (cachedData) return reply.status(200).send(cachedData);
 
     try {
       const result = await tmdb.fetchTrendingMovies(timeWindow, page);
+
       if ('error' in result) {
         request.log.error({ result, page, timeWindow }, `External API Error: Failed to fetch trending media`);
         return reply.status(500).send(result);
       }
+
       if (result && Array.isArray(result.data) && result.data.length > 0) {
         await redisSetCache(cacheKey, result, duration);
       }
+
       return reply.status(200).send(result);
     } catch (error) {
       request.log.error({ error }, `Internal runtime error occurred while fetching trending media`);
@@ -285,13 +339,16 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await tmdb.fetchTrendingTv(timeWindow, page);
+
       if ('error' in result) {
         request.log.error({ result, page, timeWindow }, `External API Error: Failed to fetch trending media`);
         return reply.status(500).send(result);
       }
+
       if (result && Array.isArray(result.data) && result.data.length > 0) {
         await redisSetCache(cacheKey, result, duration);
       }
+
       return reply.status(200).send(result);
     } catch (error) {
       request.log.error({ error }, `Internal runtime error occurred while fetching trending media`);
@@ -299,12 +356,18 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Get TV seasons and episodes
   fastify.get('/tv/:id/seasons/:season', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${12 * 60 * 60}, stale-while-revalidate=300`);
 
     const id = request.params.id;
     const season = request.params.season;
+
+    if (!id) {
+      return reply.status(400).send({ error: 'Missing required path parameter: id' });
+    }
+    if (!season) {
+      return reply.status(400).send({ error: 'Missing required path parameter: season' });
+    }
 
     const cacheKey = `tmdb-episodes-tv-${id}-${season}`;
     const cachedData = await redisGetCache(cacheKey);
@@ -336,6 +399,18 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
       const season = request.params.season;
       const episode = request.params.episode;
 
+      if (!id) {
+        return reply.status(400).send({ error: 'Missing required path parameter: id' });
+      }
+
+      if (!episode) {
+        return reply.status(400).send({ error: 'Missing required path parameter: episode' });
+      }
+
+      if (!season) {
+        return reply.status(400).send({ error: 'Missing required path parameter: season' });
+      }
+
       const cacheKey = `tmdb-episode-${id}-${season}-${episode}`;
       const cachedData = await redisGetCache(cacheKey);
       if (cachedData) return reply.status(200).send(cachedData);
@@ -357,11 +432,14 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
     },
   );
 
-  // Get streaming sources
   fastify.get('/movies/:id/sources', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     reply.header('Cache-Control', 's-maxage=600, stale-while-revalidate=60');
 
     const id = request.params.id;
+
+    if (!id) {
+      return reply.status(400).send({ error: 'Missing required path parameter: id' });
+    }
 
     try {
       const result = await tmdb.fetchMovieSources(Number(id));
@@ -384,6 +462,18 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
       const id = request.params.id;
       const season = request.params.season;
       const episode = request.params.episode;
+
+      if (!id) {
+        return reply.status(400).send({ error: 'Missing required path parameter: id' });
+      }
+
+      if (!episode) {
+        return reply.status(400).send({ error: 'Missing required path parameter: episode' });
+      }
+
+      if (!season) {
+        return reply.status(400).send({ error: 'Missing required path parameter: season' });
+      }
 
       try {
         const result = await tmdb.fetchTvSources(Number(id), Number(season), Number(episode));

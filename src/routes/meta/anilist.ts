@@ -28,7 +28,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
 
     const { q, page = 1 } = request.query;
-    if (!q) return reply.status(400).send({ error: "Missing required query param: 'q'" });
+    if (!q) return reply.status(400).send({ error: "Missing required query parameter: 'q'" });
     if (q.length > 1000) return reply.status(400).send({ error: 'Query string too long' });
 
     let perPage = Number(request.query.perPage) || 20;
@@ -83,7 +83,6 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // changed type from query params to path params  i can use /anime/top/:category and popular will be moved down here
   fastify.get(
     '/anime/top/:category',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
@@ -106,7 +105,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
         });
       }
       if (!category) {
-        return reply.status(400).send({ error: `Missing required path params: category` });
+        return reply.status(400).send({ error: `Missing required path parameter: category` });
       }
 
       const cacheKey = `anilist-top-${category}-${page}`;
@@ -122,15 +121,19 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
           case 'airing':
             result = await anilist.fetchTopAiring(page, perPage);
             break;
+
           case 'trending':
             result = await anilist.fetchTrending(page, perPage);
             break;
+
           case 'upcoming':
             result = await anilist.fetchTopUpcoming(page, perPage);
             break;
+
           case 'rating':
             result = await anilist.fetchTopRatedAnime(page, perPage);
             break;
+
           case 'popular':
             result = await anilist.fetchMostPopular(page, perPage);
             break;
@@ -141,8 +144,10 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
           return reply.status(500).send(result);
         }
 
+        let duration = category === 'airing' || category === 'trending' ? 24 : 168;
+
         if (result && Array.isArray(result.data) && result.data.length > 0) {
-          await redisSetCache(cacheKey, result, 24);
+          await redisSetCache(cacheKey, result, duration);
         }
 
         return reply.status(200).send(result);
@@ -156,7 +161,13 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
   fastify.get('/anime/:id/characters', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${168 * 60 * 60}, stale-while-revalidate=300`);
 
-    const id = Number(request.params.id);
+    const id = request.params.id;
+
+    if (!id) {
+      return reply.status(400).send({
+        error: "Missing required path parameter: 'id'.",
+      });
+    }
 
     const cacheKey = `anilist-characters-${id}`;
     const cachedData = await redisGetCache(cacheKey);
@@ -165,7 +176,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      const result = await anilist.fetchCharacters(id);
+      const result = await anilist.fetchCharacters(Number(id));
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch characters `);
         return reply.status(500).send(result);
@@ -185,8 +196,13 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
   fastify.get('/anime/:id/related', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${168 * 60 * 60}, stale-while-revalidate=300`);
 
-    const id = Number(request.params.id);
+    const id = request.params.id;
 
+    if (!id) {
+      return reply.status(400).send({
+        error: "Missing required path parameter: 'id'.",
+      });
+    }
     const cacheKey = `anilist-related-${id}`;
     const cachedData = await redisGetCache(cacheKey);
     if (cachedData) {
@@ -194,7 +210,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      const result = await anilist.fetchRelatedAnime(id);
+      const result = await anilist.fetchRelatedAnime(Number(id));
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch related anime.`);
         return reply.status(500).send(result);
@@ -244,10 +260,12 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
   fastify.get('/schedule/:id', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${12 * 60 * 60}, stale-while-revalidate=300`);
 
-    const id = Number(request.params.id);
+    const id = request.params.id;
 
     if (!id) {
-      return reply.status(400).send({ error: 'Missing required path params: id' });
+      return reply.status(400).send({
+        error: "Missing required path parameter: 'id'.",
+      });
     }
     const cacheKey = `anilist-media-schedule-${anilist}`;
     const cachedData = await redisGetCache(cacheKey);
@@ -256,7 +274,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      const result = await anilist.fetchMediaSchedule(id);
+      const result = await anilist.fetchMediaSchedule(Number(id));
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch media schedule.`);
         return reply.status(500).send(result);
@@ -293,9 +311,16 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
       if (!season) {
         return reply.status(400).send({
-          error: "Missing required query parameter: 'season'.",
+          error: "Missing required parameter parameter: 'season'.",
         });
       }
+
+      if (!year) {
+        return reply.status(400).send({
+          error: "Missing required path parameter: 'year'.",
+        });
+      }
+
       if (!IAnimeSeasonsArr.includes(season)) {
         return reply.status(400).send({
           error: `Invalid format: '${season}'. Expected one of ${IAnimeSeasonsArr.join(', ')}.`,
@@ -351,7 +376,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       }
 
       let duration;
-      const cacheKey = `anilist-provider-id-${id}-${provider}`;
+      const cacheKey = `anilist-mappings-id-${id}-${provider}`;
       const cachedData = await redisGetCache(cacheKey);
       if (cachedData) {
         return reply.status(200).send(cachedData);
@@ -398,7 +423,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
       let duration;
 
-      const cacheKey = `anilist-provider-episodes-${id}-${provider}`;
+      const cacheKey = `anilist-episodes-${id}-${provider}`;
       const cachedData = await redisGetCache(cacheKey);
       if (cachedData) {
         return reply.status(200).send(cachedData);

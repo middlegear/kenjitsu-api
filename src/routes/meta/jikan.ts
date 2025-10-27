@@ -53,7 +53,13 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
   fastify.get('/anime/:id', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
-    const id = Number(request.params.id);
+    const id = request.params.id;
+
+    if (!id) {
+      return reply.status(400).send({
+        error: "Missing required path parameter: 'id'.",
+      });
+    }
 
     let duration;
     const cacheKey = `mal-info-${id}`;
@@ -63,7 +69,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      const result = await jikan.fetchInfo(id);
+      const result = await jikan.fetchInfo(Number(id));
 
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch animeInfo`);
@@ -80,7 +86,6 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // changed type from query params to path params  i can use anime/top/:category
   fastify.get(
     '/anime/top/:category',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
@@ -92,6 +97,12 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
       const format = (request.query.format as IMetaFormat) || 'TV';
       const category = request.params.category as 'favorite' | 'popular' | 'rating' | 'airing' | 'upcoming';
+
+      if (!category) {
+        return reply.status(400).send({
+          error: `Missing required path parameter: 'category'.`,
+        });
+      }
 
       if (!IAMetaFormatArr.includes(format)) {
         return reply.status(400).send({
@@ -129,6 +140,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
           case 'airing':
             result = await jikan.fetchTopAiring(page, perPage, format);
             break;
+
           case 'upcoming':
             result = await jikan.fetchTopUpcoming(page, perPage, format);
             break;
@@ -156,15 +168,22 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
   fastify.get('/anime/:id/characters', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
 
-    const id = Number(request.params.id);
+    const id = request.params.id;
+
+    if (!id) {
+      return reply.status(400).send({
+        error: "Missing required path parameter: 'id'.",
+      });
+    }
 
     const cacheKey = `mal-characters-${id}`;
     const cachedData = await redisGetCache(cacheKey);
     if (cachedData) {
       return reply.status(200).send(cachedData);
     }
+
     try {
-      const result = await jikan.fetchAnimeCharacters(id);
+      const result = await jikan.fetchAnimeCharacters(Number(id));
 
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch next seasonal anime list`);
@@ -202,7 +221,11 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
           error: `Invalid format: '${format}'. Expected one of ${IAMetaFormatArr.join(', ')}.`,
         });
       }
-
+      if (!season) {
+        return reply.status(400).send({
+          error: "Missing required path parameter: 'season'.",
+        });
+      }
       const validSeasons = [...IAnimeSeasonsArr, 'current', 'upcoming'];
       if (!validSeasons.includes(season)) {
         return reply.status(400).send({
@@ -270,7 +293,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       }
 
       let duration;
-      const cacheKey = `mal-provider-id-${id}-${provider}`;
+      const cacheKey = `mal-mappings-id-${id}-${provider}`;
       const cachedData = await redisGetCache(cacheKey);
       if (cachedData) {
         return reply.status(200).send(cachedData);
@@ -299,7 +322,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/episodes/:id',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
-      reply.header('Cache-Control', `s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
+      reply.header('Cache-Control', `s-maxage=${0.5 * 60 * 60}, stale-while-revalidate=300`);
 
       const id = Number(request.params.id);
       const provider = (request.query.provider as 'allanime' | 'hianime' | 'animepahe' | 'anizone') || 'hianime';
@@ -317,7 +340,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
 
       let duration;
 
-      const cacheKey = `mal-provider-episodes-${id}-${provider}`;
+      const cacheKey = `mal-episodes-${id}-${provider}`;
       const cachedData = await redisGetCache(cacheKey);
       if (cachedData) {
         return reply.status(200).send(cachedData);
@@ -337,7 +360,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
           result.providerEpisodes.length > 0 &&
           result.data.format.toLowerCase() !== 'movie'
         ) {
-          result.data.status.toLowerCase() === 'finished airing' ? (duration = 0) : (duration = 2);
+          result.data.status.toLowerCase() === 'finished airing' ? (duration = 0) : (duration = 1);
           await redisSetCache(cacheKey, result, duration);
         }
         return reply.status(200).send(result);

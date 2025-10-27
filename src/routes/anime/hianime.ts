@@ -48,16 +48,9 @@ export default async function hianimeRoutes(fastify: FastifyInstance) {
   fastify.get('/anime/suggestions', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
 
-    let q = request.query.q?.trim() ?? '';
-    q = decodeURIComponent(q);
-    q = q.replace(/[^\w\s\-_.]/g, '');
-
-    if (!q.length) {
-      return reply.status(400).send({ error: "Missing required query params: 'q' " });
-    }
-    if (q.length > 1000) {
-      return reply.status(400).send({ error: 'query string too long' });
-    }
+    const { q } = request.query;
+    if (!q) return reply.status(400).send({ error: "Missing required query param: 'q'" });
+    if (q.length > 1000) return reply.status(400).send({ error: 'Query string too long' });
 
     try {
       const result = await zoro.searchSuggestions(q);
@@ -77,7 +70,11 @@ export default async function hianimeRoutes(fastify: FastifyInstance) {
   fastify.get('/anime/:id', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
 
-    const id = String(request.params.id);
+    const id = request.params.id;
+
+    if (!id) {
+      return reply.status(400).send({ error: 'Missing required path parameter: id' });
+    }
 
     let duration;
     const cacheKey = `hianime-info-${id}`;
@@ -109,7 +106,6 @@ export default async function hianimeRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // moved type from query to path. use this route /anime/category/:category
   fastify.get(
     '/anime/category/:category',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
@@ -120,7 +116,7 @@ export default async function hianimeRoutes(fastify: FastifyInstance) {
 
       if (!category) {
         return reply.status(400).send({
-          error: `Missing required path params. Expected 'category' as (subbed/dubbed/popular/favourites/airing).`,
+          error: `Missing required path parameter. Expected 'category' as (subbed/dubbed/popular/favourites/airing).`,
         });
       }
 
@@ -171,7 +167,7 @@ export default async function hianimeRoutes(fastify: FastifyInstance) {
       }
     },
   );
-  /// moved status from query params to path params
+
   fastify.get(
     '/anime/recent/:status',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
@@ -181,7 +177,7 @@ export default async function hianimeRoutes(fastify: FastifyInstance) {
       const page = Number(request.query.page);
 
       if (!status) {
-        return reply.status(400).send({ error: `Missing required path params:status` });
+        return reply.status(400).send({ error: `Missing required path parameter: status` });
       }
       if (status !== 'completed' && status !== 'added' && status !== 'updated') {
         return reply
@@ -201,8 +197,11 @@ export default async function hianimeRoutes(fastify: FastifyInstance) {
           case 'completed':
             result = await zoro.fetchRecentlyCompleted(page);
             break;
+
           case 'added':
             result = await zoro.fetchRecentlyAdded(page);
+            break;
+
           case 'updated':
             result = await zoro.fetchRecentlyAdded(page);
             break;
@@ -229,7 +228,11 @@ export default async function hianimeRoutes(fastify: FastifyInstance) {
       reply.header('Cache-Control', `s-maxage=${168 * 60 * 60}, stale-while-revalidate=300`);
 
       const page = Number(request.query.page) || 1;
-      const sort = String(request.params.sort);
+      const sort = request.params.sort;
+
+      if (!sort) {
+        return reply.status(400).send({ error: `Missing required path parameter: sort` });
+      }
 
       const cacheKey = `hianime-sort-${sort}-${page}`;
 
@@ -257,7 +260,6 @@ export default async function hianimeRoutes(fastify: FastifyInstance) {
     },
   );
 
-  // moved format from query params to path params change the route to /anime/format/:format
   fastify.get(
     '/anime/format/:format',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {

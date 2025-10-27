@@ -15,7 +15,7 @@ export interface FastifyParams {
 export interface FastifyQuery {
   score?: string;
   q?: string;
-  sort?: string;
+  year?: string;
   type?: string;
   page?: number;
   perPage?: number;

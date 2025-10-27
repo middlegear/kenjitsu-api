@@ -77,7 +77,11 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
   fastify.get('/anime/:id', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
 
-    const id = String(request.params.id);
+    const id = request.params.id;
+
+    if (!id) {
+      return reply.status(400).send({ error: 'Missing required path parameter: id' });
+    }
 
     let duration;
     const cacheKey = `kaido-info-${id}`;
@@ -109,7 +113,6 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // moved type from query to path params
   fastify.get(
     '/anime/category/:category',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
@@ -120,7 +123,7 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
 
       if (!category) {
         return reply.status(400).send({
-          error: `Missing required path params. Expected 'category'  as (subbed/dubbed/popular/favourites/airing).`,
+          error: `Missing required path parameter. Expected 'category'  as (subbed/dubbed/popular/favourites/airing).`,
         });
       }
 
@@ -172,7 +175,6 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
     },
   );
 
-  /// moved status from query params to path params
   fastify.get(
     '/anime/recent/:status',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
@@ -182,7 +184,7 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
       const page = Number(request.query.page) || 1;
 
       if (!status) {
-        return reply.status(400).send({ error: `Missing required path params: status` });
+        return reply.status(400).send({ error: `Missing required path parameter: status` });
       }
       if (status !== 'completed' && status !== 'added' && status !== 'updated') {
         return reply
@@ -202,8 +204,11 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
           case 'completed':
             result = await zoro.fetchRecentlyCompleted(page);
             break;
+
           case 'added':
             result = await zoro.fetchRecentlyAdded(page);
+            break;
+
           case 'updated':
             result = await zoro.fetchRecentlyAdded(page);
             break;
@@ -232,6 +237,10 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
       const page = Number(request.query.page) || 1;
       const sort = String(request.params.sort);
 
+      if (!sort) {
+        return reply.status(400).send({ error: `Missing required path parameter: sort` });
+      }
+
       const cacheKey = `kaido-sort-${sort}-${page}`;
 
       const cachedData = await redisGetCache(cacheKey);
@@ -257,7 +266,7 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
       }
     },
   );
-  /// mmoved format from query  to path
+
   fastify.get(
     '/anime/format/:format',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {

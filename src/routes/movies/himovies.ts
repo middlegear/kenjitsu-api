@@ -33,7 +33,6 @@ export default async function himoviesRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Search media
   fastify.get('/media/search', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
 
@@ -55,7 +54,6 @@ export default async function himoviesRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Get search suggestions
   fastify.get('/media/suggestions', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
 
@@ -76,7 +74,6 @@ export default async function himoviesRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Get movies (popular, top-rated)
   fastify.get(
     '/movies/category/:category',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
@@ -85,10 +82,16 @@ export default async function himoviesRoutes(fastify: FastifyInstance) {
       const category = request.params.category as 'popular' | 'top-rated';
       const page = request.query.page || 1;
 
+      if (!category) {
+        return reply.status(400).send({
+          error: `Missing required path parameter: 'category'.`,
+        });
+      }
+
       const validCategories = ['popular', 'top-rated'] as const;
       if (!validCategories.includes(category)) {
         return reply.status(400).send({
-          error: `Invalid sort: '${category}'. Expected one of ${validCategories.join(', ')}.`,
+          error: `Invalid category: '${category}'. Expected one of ${validCategories.join(', ')}.`,
         });
       }
 
@@ -134,10 +137,16 @@ export default async function himoviesRoutes(fastify: FastifyInstance) {
       const category = request.params.category as 'popular' | 'top-rated';
       const page = request.query.page || 1;
 
+      if (!category) {
+        return reply.status(400).send({
+          error: `Missing required path parameter: 'category'.`,
+        });
+      }
+
       const validCategories = ['popular', 'top-rated'] as const;
       if (!validCategories.includes(category)) {
         return reply.status(400).send({
-          error: `Invalid sort: '${category}'. Expected one of ${validCategories.join(', ')}.`,
+          error: `Invalid category: '${category}'. Expected one of ${validCategories.join(', ')}.`,
         });
       }
 
@@ -154,6 +163,7 @@ export default async function himoviesRoutes(fastify: FastifyInstance) {
           case 'popular':
             result = await himovies.fetchPopularTv(page);
             break;
+
           case 'top-rated':
             result = await himovies.fetchTopTv(page);
             break;
@@ -210,11 +220,12 @@ export default async function himoviesRoutes(fastify: FastifyInstance) {
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
       reply.header('Cache-Control', `s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
 
-      const genre = request.query.genre as IMovieGenre | 'all' | undefined;
-      const country = request.query.country as IMovieCountry | undefined;
+      const genre = request.query.genre || 'all';
+      const country = request.query.country || 'all';
       const type = (request.query.type as 'movie' | 'tv' | 'all') || 'all';
       const quality = (request.query.quality as 'all' | 'HD' | 'SD' | 'CAM') || 'all';
       const page = Number(request.query.page) || 1;
+      const year = request.query.year || 'all';
 
       const validTypes = ['movie', 'tv', 'all'] as const;
       if (!validTypes.includes(type)) {
@@ -230,16 +241,14 @@ export default async function himoviesRoutes(fastify: FastifyInstance) {
         });
       }
 
-      const selectedCountry = country || 'all';
-
-      const cacheKey = `himovies-advanced-search-${type}-${quality}-${genre}-${selectedCountry}-${page}`;
+      const cacheKey = `himovies-advanced-search-${type}-${quality}-${genre}-${year}-${country}-${page}`;
       const cachedData = await redisGetCache(cacheKey);
       if (cachedData) {
         return reply.status(200).send(cachedData);
       }
 
       try {
-        const result = await himovies.advancedSearch(type, quality, genre, selectedCountry, page);
+        const result = await himovies.advancedSearch(type, quality, genre, country, year, page);
 
         if ('error' in result) {
           request.log.error({ result }, `External API Error.`);
@@ -257,7 +266,6 @@ export default async function himoviesRoutes(fastify: FastifyInstance) {
     },
   );
 
-  // Get media details
   fastify.get(
     '/media/:id',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
@@ -382,6 +390,7 @@ export default async function himoviesRoutes(fastify: FastifyInstance) {
           error: "Missing required path parameter: 'episodeId'.",
         });
       }
+
       const cacheKey = `himovies-servers-${episodeId}`;
       const cachedData = await redisGetCache(cacheKey);
       if (cachedData) {
@@ -413,11 +422,13 @@ export default async function himoviesRoutes(fastify: FastifyInstance) {
 
       const episodeId = request.params.episodeId;
       const server = (request.query.server as 'megacloud' | 'akcloud' | 'upcloud') || 'megacloud';
+
       if (!episodeId) {
         return reply.status(400).send({
           error: "Missing required path parameter: 'episodeId'.",
         });
       }
+
       const validServers = ['megacloud', 'akcloud', 'upcloud'] as const;
       if (!validServers.includes(server)) {
         return reply.status(400).send({
