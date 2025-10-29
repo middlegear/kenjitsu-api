@@ -50,6 +50,19 @@ const app = Fastify({
 });
 
 async function FastifyApp() {
+  app.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
+    const userAgent = Array.isArray(request.headers['user-agent'])
+      ? request.headers['user-agent'][0]
+      : request.headers['user-agent'];
+
+    if (!userAgent || typeof userAgent !== 'string' || userAgent.trim() === '') {
+      request.log.error({ reqId: request.id }, 'Blocked Request');
+      return reply.code(403).send({
+        error: 'Forbidden',
+      });
+    }
+  });
+
   app.register(rateLimitPlugIn, ratelimitOptions);
 
   await checkRedis();
@@ -57,7 +70,7 @@ async function FastifyApp() {
   await app.register(StaticRoutes);
   await app.register(AnilistRoutes, { prefix: '/api/anilist' });
   await app.register(JikanRoutes, { prefix: '/api/jikan' });
-  // await app.register(AnimekaiRoutes, { prefix: '/api/animekai' }); disabled intentionally.
+  await app.register(AnimekaiRoutes, { prefix: '/api/animekai' });
   await app.register(HianimeRoutes, { prefix: '/api/hianime' });
   await app.register(KaidoRoutes, { prefix: '/api/kaido' });
   await app.register(AnimepaheRoutes, { prefix: '/api/animepahe' });
