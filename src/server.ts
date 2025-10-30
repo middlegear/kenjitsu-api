@@ -17,7 +17,6 @@ import TheMovieDatabaseRoutes from './routes/meta/tmdb.js';
 import { ratelimitOptions, rateLimitPlugIn } from './config/ratelimit.js';
 import fastifyCors, { corsOptions } from './config/cors.js';
 import { checkRedis } from './config/redis.js';
-import { purgeCache } from './middleware/cache.js';
 
 events.defaultMaxListeners = 25;
 
@@ -30,6 +29,8 @@ const app = Fastify({
         url: req.url,
         query: req.query,
         params: req.params,
+        ip: req.ip,
+        ips: req.ips,
         headers: {
           'user-agent': req.headers['user-agent'],
         },
