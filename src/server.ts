@@ -29,8 +29,7 @@ const app = Fastify({
         url: req.url,
         query: req.query,
         params: req.params,
-        ip: req.ip,
-        ips: req.ips,
+
         headers: {
           'user-agent': req.headers['user-agent'],
         },
