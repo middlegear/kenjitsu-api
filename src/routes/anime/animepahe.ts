@@ -28,7 +28,18 @@ export default async function AnimepaheRoutes(fastify: FastifyInstance) {
     }
   });
 
+  /**
+   * deprecated
+   */
   fastify.get('/anime/updates', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
+    reply.header('Cache-Control', `s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
+
+    return reply.status(418).send({
+      message: 'deprecated kindly use episodes/recent',
+    });
+  });
+
+  fastify.get('/episodes/recent', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
 
     const page = request.query.page || 1;
@@ -46,7 +57,6 @@ export default async function AnimepaheRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({ error: `Internal server occurred:${error}` });
     }
   });
-
   fastify.get('/anime/:id', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `s-maxage=${2 * 60 * 60}, stale-while-revalidate=300`);
 
