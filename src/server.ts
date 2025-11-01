@@ -67,7 +67,7 @@ async function FastifyApp() {
   app.addHook('onSend', async (request: FastifyRequest, reply: FastifyReply, payload) => {
     const status = reply.statusCode;
 
-    if (status >= 400) {
+    if (status !== 200) {
       reply.removeHeader('Cache-Control');
       reply.header('Cache-Control', 'no-store, no-cache, must-revalidate, private');
       reply.header('Surrogate-Control', 'no-store');
