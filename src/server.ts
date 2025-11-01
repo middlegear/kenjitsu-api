@@ -63,6 +63,22 @@ async function FastifyApp() {
     }
   });
 
+  // just to make sure that only status 200 responses are cached by cdn
+  app.addHook('onSend', async (request: FastifyRequest, reply: FastifyReply, payload) => {
+    const status = reply.statusCode;
+
+    if (status >= 400) {
+      reply.removeHeader('Cache-Control');
+      reply.header('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      reply.header('Surrogate-Control', 'no-store');
+    }
+
+    const reset = reply.getHeader('x-ratelimit-reset');
+    if (reset) reply.header('Retry-After', reset);
+
+    return payload;
+  });
+
   app.register(rateLimitPlugIn, ratelimitOptions);
 
   await checkRedis();
