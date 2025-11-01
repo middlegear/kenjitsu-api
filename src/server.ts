@@ -71,7 +71,7 @@ async function FastifyApp() {
 
   await app.register(AnilistRoutes, { prefix: '/api/anilist' });
   await app.register(JikanRoutes, { prefix: '/api/jikan' });
-  // await app.register(AnimekaiRoutes, { prefix: '/api/animekai' });
+  await app.register(AnimekaiRoutes, { prefix: '/api/animekai' });
   await app.register(HianimeRoutes, { prefix: '/api/hianime' });
   await app.register(KaidoRoutes, { prefix: '/api/kaido' });
   await app.register(AnimepaheRoutes, { prefix: '/api/animepahe' });
