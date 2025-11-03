@@ -450,7 +450,7 @@ export default async function hianimeRoutes(fastify: FastifyInstance) {
         });
       }
       try {
-        const result = await zoro.fetchSources(episodeId, 'hd-2', version);
+        const result = await zoro.fetchSources(episodeId, server, version);
 
         if ('error' in result) {
           request.log.error({ result, episodeId, server, version }, `External API Error: Failed to fetch sources`);
