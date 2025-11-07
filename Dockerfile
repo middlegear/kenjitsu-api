@@ -17,11 +17,13 @@ RUN if [ -n "$NPM_TOKEN" ]; then \
 # Install dependencies
 RUN npm install
 
-
+# Copy the full source
 COPY . .
 
 # Build TypeScript
 RUN npm run build
+
+
 # ==========================================
 #  Runtime Stage
 # ==========================================
@@ -29,11 +31,12 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy build output and package files from builder
+# Copy build output, package files, and static assets from builder
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/public ./public
 COPY package*.json .npmrc ./
 
-# Pass GitHub token again (important!)
+# Configure npm again for GitHub Packages.
 ARG NPM_TOKEN
 RUN if [ -n "$NPM_TOKEN" ]; then \
       npm config set //npm.pkg.github.com/:_authToken=$NPM_TOKEN; \
@@ -48,4 +51,5 @@ ENV PORT=3000
 
 EXPOSE 3000
 
+# Start the server
 CMD ["node", "dist/server.js"]
