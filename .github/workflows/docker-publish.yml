@@ -1,29 +1,28 @@
-name:  Build and Publish Docker Image
+name: Build and Publish Docker Image
 
 on:
   workflow_dispatch:
 
 jobs:
-  build-and-publish:
-    name:  Build & Push kenjitsu-api Image
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
 
     steps:
-      - name:  Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name:  Log in to GitHub Container Registry
+      - name: Login to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name:  Build Docker image
+      - name: Build Docker image
         run: |
-          docker buildx build . \
+          docker build \
             --build-arg NPM_TOKEN=${{ secrets.GH_PACKAGES_TOKEN }} \
             -t ghcr.io/${{ github.repository_owner }}/kenjitsu-api:latest \
-            --load
+            .
 
-      - name:  Push Docker image
+      - name: Push Docker image
         run: docker push ghcr.io/${{ github.repository_owner }}/kenjitsu-api:latest
