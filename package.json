@@ -1,5 +1,5 @@
 {
-  "name": "kenjitsu",
+  "name": "kenjitsu-api",
   "version": "1.0.0",
   "description": "A lightweight API that serves metadata and video sources from popular streaming sites.",
   "main": "src/server.ts",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/middlegear/kenjitsu.git"
+    "url": "git+https://github.com/middlegear/kenjitsu-api.git"
   },
   "keywords": [
     "anime",
@@ -25,7 +25,7 @@
   "bugs": {
     "url": "https://github.com/middlegear/kenjitsu-api/issues"
   },
-  "homepage": "https://github.com/middlegear/kenjitsu#readme",
+  "homepage": "https://github.com/middlegear/kenjitsu-api#readme",
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
