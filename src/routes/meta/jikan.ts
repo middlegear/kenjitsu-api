@@ -7,6 +7,7 @@ import {
   Animepahe,
   Anizone,
   HiAnime,
+  Kaido,
 } from '@middlegear/kenjitsu-extensions';
 
 import {
@@ -24,6 +25,7 @@ const allanime = new AllAnime();
 const anizone = new Anizone();
 const hianime = new HiAnime();
 const animepahe = new Animepahe();
+const kaido = new Kaido();
 
 export default async function JikanRoutes(fastify: FastifyInstance) {
   fastify.get('/anime/search', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
@@ -375,62 +377,96 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
     async (request: FastifyRequest<{ Params: FastifyParams; Querystring: FastifyQuery }>, reply: FastifyReply) => {
       reply.header('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=60');
 
-      const episodeId = String(request.params.episodeId);
+      const episodeId = request.params.episodeId;
+      const provider = request.query.provider as 'allanime' | 'hianime' | 'animepahe' | 'kaido' | 'anizone';
+      const version = (request.query.version as 'sub' | 'dub' | 'raw') || 'sub';
+      let server = request.query.server;
 
-      const validCategories = ['sub', 'dub', 'raw'] as const;
-      const validServers = ['hd-1', 'hd-2', 'hd-3'] as const;
-
-      const version = request.query.version || 'sub';
-      const server = (request.query.server as string) || 'hd-2';
+      const allowedSourceProviders = ['allanime', 'hianime', 'animepahe', 'kaido', 'anizone'] as const;
+      const validVersions = ['sub', 'dub', 'raw'] as const;
+      const validZoroServers = ['hd-1', 'hd-2', 'hd-3'] as const;
 
       if (!episodeId) {
+        return reply.status(400).send({ error: "Missing required path parameter: 'episodeId'." });
+      }
+
+      if (!provider) {
+        return reply.status(400).send({ error: "Missing required query parameter: 'provider'." });
+      }
+      if (!allowedSourceProviders.includes(provider)) {
         return reply.status(400).send({
-          error: "Missing required path parameter: 'episodeId'.",
+          error: `Invalid provider '${provider}'. Expected one of: ${allowedSourceProviders.join(', ')}`,
         });
       }
 
-      if (!validCategories.includes(version as any)) {
+      if (!validVersions.includes(version as any)) {
         return reply.status(400).send({
-          error: `Invalid version '${version}'. Expected one of ${validCategories.join(', ')}.`,
+          error: `Invalid category '${version}'. Expected one of: ${validVersions.join(', ')}.`,
         });
       }
 
-      if (episodeId.includes('hianime')) {
-        if (!validServers.includes(server as any)) {
-          return reply.status(400).send({
-            error: `Invalid streaming server '${server}'. Expected one of ${validServers.join(', ')}.`,
-          });
+      if (provider === 'hianime') {
+        if (server) {
+          if (!validZoroServers.includes(server as any)) {
+            return reply
+              .status(400)
+              .send({ error: `Invalid server '${server}'. Expected one of: ${validZoroServers.join(', ')}.` });
+          }
+        } else {
+          server = 'hd-2';
+        }
+      }
+
+      if (provider === 'kaido') {
+        if (server) {
+          if (!['vidstreaming', 'vidcloud'].includes(server)) {
+            return reply.status(400).send({ error: `Invalid server '${server}'. Expected 'vidstreaming' or 'vidcloud'.` });
+          }
+        } else {
+          server = 'vidcloud';
         }
       }
 
       try {
         let result;
 
-        if (episodeId.includes('hianime')) {
-          result = await hianime.fetchSources(
-            episodeId,
-            server as (typeof validServers)[number],
-            version as (typeof validCategories)[number],
-          );
-        } else if (episodeId.includes('allanime')) {
-          result = await allanime.fetchSources(episodeId, version as 'sub' | 'dub');
-        } else if (episodeId.includes('pahe')) {
-          result = await animepahe.fetchSources(episodeId, version as 'sub' | 'dub');
-        } else if (episodeId.includes('anizone')) {
-          result = await anizone.fetchSources(episodeId);
-        } else
-          return reply.status(400).send({
-            error: `Unsupported  episodeId: '${episodeId}' Fetch the right episodeId from api/jikan/episodes/:id.`,
-          });
+        switch (provider) {
+          case 'allanime':
+            result = await allanime.fetchSources(episodeId, version);
+            break;
+
+          case 'hianime':
+            result = await hianime.fetchSources(episodeId, server as 'hd-1' | 'hd-2' | 'hd-3', version);
+            break;
+
+          case 'animepahe':
+            result = await animepahe.fetchSources(episodeId, version);
+            break;
+
+          case 'kaido':
+            result = await kaido.fetchSources(episodeId, server as 'vidstreaming' | 'vidcloud', version);
+            break;
+
+          case 'anizone':
+            result = await anizone.fetchSources(episodeId);
+            break;
+
+          default:
+            return reply.status(400).send({ error: `Provider '${provider}' is not supported.` });
+        }
+
         if ('error' in result) {
-          request.log.error({ result, episodeId, version }, `External API Error: Failed to fetch sources`);
+          request.log.error({ result, episodeId, provider, version, server }, `External API Error: Failed to fetch sources`);
           return reply.status(500).send(result);
         }
 
         return reply.status(200).send(result);
-      } catch (error) {
-        request.log.error({ error: error }, `Internal runtime error occurred while fetching sources`);
-        return reply.status(500).send({ error: `Internal server error occurred: ${error}` });
+      } catch (error: any) {
+        request.log.error(
+          { error: error?.message ?? error, episodeId, provider, server },
+          `Internal runtime error occurred while fetching sources`,
+        );
+        return reply.status(500).send({ error: 'Internal server error' });
       }
     },
   );
