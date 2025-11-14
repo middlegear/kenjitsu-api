@@ -9,7 +9,6 @@ export default async function AllAnimeRoutes(fastify: FastifyInstance) {
     reply.header('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=300');
 
     const q = request.query.q;
-    const page = request.query.page;
 
     if (!q) return reply.status(400).send({ error: "Missing required query param: 'q'" });
     if (q.length > 1000) return reply.status(400).send({ error: 'Query string too long' });
