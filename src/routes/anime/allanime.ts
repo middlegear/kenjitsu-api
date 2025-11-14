@@ -8,12 +8,14 @@ export default async function AllAnimeRoutes(fastify: FastifyInstance) {
   fastify.get('/anime/search', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     reply.header('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=300');
 
-    const { q, page } = request.query;
+    const q = request.query.q;
+    const page = request.query.page;
+
     if (!q) return reply.status(400).send({ error: "Missing required query param: 'q'" });
     if (q.length > 1000) return reply.status(400).send({ error: 'Query string too long' });
 
     try {
-      const result = await allanime.search(q, page);
+      const result = await allanime.search(q);
       if ('error' in result) {
         request.log.error({ result, q }, `External API Error`);
         return reply.status(500).send(result);
