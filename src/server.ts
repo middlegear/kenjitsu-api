@@ -8,6 +8,7 @@ import HianimeRoutes from './routes/anime/hianime.js';
 import AnimepaheRoutes from './routes/anime/animepahe.js';
 import KaidoRoutes from './routes/anime/kaido.js';
 import AnizoneRoutes from './routes/anime/anizone.js';
+import AllAnimeRoutes from './routes/anime/allanime.js';
 import AnilistRoutes from './routes/meta/anilist.js';
 import JikanRoutes from './routes/meta/jikan.js';
 import HimoviesRoutes from './routes/movies/himovies.js';
@@ -79,6 +80,7 @@ async function FastifyApp() {
   await app.register(KaidoRoutes, { prefix: '/api/kaido' });
   await app.register(AnimepaheRoutes, { prefix: '/api/animepahe' });
   await app.register(AnizoneRoutes, { prefix: '/api/anizone' });
+  await app.register(AllAnimeRoutes, { prefix: '/api/allanime' });
   await app.register(FlixHQRoutes, { prefix: '/api/flixhq' });
   await app.register(HimoviesRoutes, { prefix: '/api/himovies' });
   await app.register(TheMovieDatabaseRoutes, { prefix: '/api/tmdb' });
