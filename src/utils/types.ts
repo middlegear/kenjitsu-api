@@ -41,9 +41,5 @@ export const allowedProviders = ['allanime', 'hianime', 'animepahe', 'anizone'];
 
 export const JikanList = ['favorite', 'popular', 'rating', 'airing', 'upcoming'] as const;
 export type AllAnimeServers =
-  | 'okru'
-  | 'mp4upload'
-  | 'internal-s-mp4'
-  | 'internal-default-hls'
-  | 'internal-ak'
-  | 'internal-yt-mp4';
+  // | 'okru'
+  'mp4upload' | 'internal-s-mp4' | 'internal-default-hls' | 'internal-ak' | 'internal-yt-mp4';

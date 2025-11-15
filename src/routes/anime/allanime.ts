@@ -86,14 +86,14 @@ export default async function AllAnimeRoutes(fastify: FastifyInstance) {
       const episodeId = request.params.episodeId;
       const version = (request.query.version as 'sub' | 'dub' | 'raw') || 'sub';
       const allowedServers = [
-        'okru',
+        // 'okru',
         'internal-default-hls',
         'internal-ak',
         'internal-s-mp4',
         'internal-yt-mp4',
         'mp4upload',
       ] as const;
-      const server = (request.query.server as AllAnimeServers) || 'okru';
+      const server = (request.query.server as AllAnimeServers) || 'internal-s-mp4';
 
       if (!episodeId) {
         return reply.status(400).send({
