@@ -1,14 +1,5 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import {
-  Jikan,
-  type Seasons,
-  type IMetaFormat,
-  AllAnime,
-  Animepahe,
-  Anizone,
-  HiAnime,
-  Kaido,
-} from '@middlegear/kenjitsu-extensions';
+import { Jikan, type Seasons, type IMetaFormat } from '@middlegear/kenjitsu-extensions';
 
 import {
   type FastifyQuery,
@@ -21,11 +12,6 @@ import {
 import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
 
 const jikan = new Jikan();
-const allanime = new AllAnime();
-const anizone = new Anizone();
-const hianime = new HiAnime();
-const animepahe = new Animepahe();
-const kaido = new Kaido();
 
 export default async function JikanRoutes(fastify: FastifyInstance) {
   fastify.get('/anime/search', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
@@ -118,7 +104,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
         });
       }
 
-      const cacheKey = `mal-${category}-${format}-${page}`;
+      const cacheKey = `mal-${category}-${format}-${page}-${perPage}`;
       const cachedData = await redisGetCache(cacheKey);
       if (cachedData) {
         return reply.status(200).send(cachedData);
@@ -362,7 +348,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
           result.providerEpisodes.length > 0 &&
           result.data.format.toLowerCase() !== 'movie'
         ) {
-          result.data.status.toLowerCase() === 'finished airing' ? (duration = 168) : (duration = 1);
+          result.data.status.toLowerCase() === 'finished airing' ? (duration = 168) : (duration = 2);
           await redisSetCache(cacheKey, result, duration);
         }
         return reply.status(200).send(result);

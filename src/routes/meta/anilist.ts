@@ -1,14 +1,5 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import {
-  Anilist,
-  AllAnime,
-  Anizone,
-  Animepahe,
-  HiAnime,
-  type Seasons,
-  type IMetaFormat,
-  Kaido,
-} from '@middlegear/kenjitsu-extensions';
+import { Anilist, type Seasons, type IMetaFormat } from '@middlegear/kenjitsu-extensions';
 import {
   allowedProviders,
   IAMetaFormatArr,
@@ -19,11 +10,6 @@ import {
 import { redisSetCache, redisGetCache } from '../../middleware/cache.js';
 
 const anilist = new Anilist();
-const allanime = new AllAnime();
-const anizone = new Anizone();
-const hianime = new HiAnime();
-const animepahe = new Animepahe();
-const kaido = new Kaido();
 
 export default async function AnilistRoutes(fastify: FastifyInstance) {
   fastify.get('/anime/search', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
@@ -110,7 +96,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
         return reply.status(400).send({ error: `Missing required path parameter: category` });
       }
 
-      const cacheKey = `anilist-top-${category}-${page}`;
+      const cacheKey = `anilist-top-${category}-${page}-${perPage}`;
       const cacheData = await redisGetCache(cacheKey);
       if (cacheData) {
         return reply.status(200).send(cacheData);
@@ -330,7 +316,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
         });
       }
 
-      const cacheKey = `anilist-season-${season}-${year}-${page}-${format}`;
+      const cacheKey = `anilist-season-${season}-${year}-${page}-${format}-${perPage}`;
       const cachedData = await redisGetCache(cacheKey);
       if (cachedData) {
         return reply.status(200).send(cachedData);
