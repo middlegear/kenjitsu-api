@@ -1,9 +1,11 @@
-import { FlixHQ, type IMovieGenre, type IMovieCountry } from '@middlegear/kenjitsu-extensions';
+import 'dotenv/config';
+import { FlixHQ } from '@middlegear/kenjitsu-extensions';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { FastifyParams, FastifyQuery } from '../../utils/types.js';
 import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
 
-const flixhq = new FlixHQ();
+const baseUrl = process.env.FLIXHQURL || 'https://flixhq.to';
+const flixhq = new FlixHQ(baseUrl);
 
 export default async function FlixHQRoutes(fastify: FastifyInstance) {
   fastify.get('/home', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -17,6 +19,12 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await flixhq.fetchHome();
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
 
       if ('error' in result) {
         request.log.error({ result }, `External API Error`);
@@ -41,13 +49,27 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
     if (!q) return reply.status(400).send({ error: "Missing required query param: 'q'" });
     if (q.length > 1000) return reply.status(400).send({ error: 'Query string too long' });
 
+    const cacheKey = `flix-search-${q}-${page}`;
+    const cachedData = await redisGetCache(cacheKey);
+    if (cachedData) return reply.status(200).send(cachedData);
+
     try {
       const result = await flixhq.search(q, page);
 
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ q, page, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, q, page }, `External API Error: Failed to fetch search results.`);
         return reply.status(500).send(result);
       }
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 0);
+      }
+
       return reply.status(200).send(result);
     } catch (error) {
       request.log.error({ error: error }, `Internal runtime error occurred while querying search results`);
@@ -62,14 +84,26 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
 
     if (!q) return reply.status(400).send({ error: "Missing required query param: 'q'" });
     if (q.length > 1000) return reply.status(400).send({ error: 'Query string too long' });
+
+    const cacheKey = `flix-suggestions-${q}}`;
+    const cachedData = await redisGetCache(cacheKey);
+    if (cachedData) return reply.status(200).send(cachedData);
+
     try {
       const result = await flixhq.searchSuggestions(q);
-
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ q, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, q }, `External API Error: Failed to fetch search results.`);
         return reply.status(500).send(result);
       }
-
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 0);
+      }
       return reply.status(200).send(result);
     } catch (error) {
       request.log.error({ error: error }, `Internal runtime error occurred while querying search results`);
@@ -116,13 +150,19 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
             break;
         }
 
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ category, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result }, `External API Error.`);
           return reply.status(500).send(result);
         }
 
         if (result && Array.isArray(result.data) && result.data.length > 0) {
-          await redisSetCache(cacheKey, result, 336);
+          await redisSetCache(cacheKey, result, 720);
         }
 
         return reply.status(200).send(result);
@@ -170,6 +210,12 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
             result = await flixhq.fetchTopTv(page);
             break;
         }
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ category, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
 
         if ('error' in result) {
           request.log.error({ result }, `External API Error.`);
@@ -177,7 +223,7 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
         }
 
         if (result && Array.isArray(result.data) && result.data.length > 0) {
-          await redisSetCache(cacheKey, result, 336);
+          await redisSetCache(cacheKey, result, 720);
         }
 
         return reply.status(200).send(result);
@@ -201,6 +247,12 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
     try {
       const result = await flixhq.fetchUpcoming(page);
 
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ page, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result }, `External API Error.`);
         return reply.status(500).send(result);
@@ -251,7 +303,12 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
 
       try {
         const result = await flixhq.advancedSearch(type, quality, genre, country, year, page);
-
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ page, genre, country, type, quality, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result }, `External API Error.`);
           return reply.status(500).send(result);
@@ -288,15 +345,23 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
 
       try {
         const result = await flixhq.fetchMediaInfo(mediaId);
-
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ mediaId, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result }, `External API Error.`);
           return reply.status(500).send(result);
         }
 
         if (result && result.data !== null && Array.isArray(result.providerEpisodes) && result.providerEpisodes.length > 0) {
-          await redisSetCache(cacheKey, result, 168);
+          let duration;
+          result.data.type?.toLowerCase() === 'movie' ? (duration = 0) : (duration = 168);
+          await redisSetCache(cacheKey, result, duration);
         }
+
         return reply.status(200).send(result);
       } catch (error) {
         request.log.error({ error: error }, `Internal runtime error occurred.`);
@@ -327,7 +392,12 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
 
       try {
         const result = await flixhq.fetchGenre(genre, page);
-
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ page, genre, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result }, `External API Error.`);
           return reply.status(500).send(result);
@@ -365,13 +435,18 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
 
       try {
         const result = await flixhq.fetchByCountry(country, page);
-
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ page, country, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result }, `External API Error.`);
           return reply.status(500).send(result);
         }
         if (result && Array.isArray(result.data) && result.data.length > 0) {
-          await redisSetCache(cacheKey, result, 336);
+          await redisSetCache(cacheKey, result, 720);
         }
         return reply.status(200).send(result);
       } catch (error) {
@@ -399,14 +474,19 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
       }
       try {
         const result = await flixhq.fetchServers(episodeId);
-
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ episodeId, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result }, `External API Error.`);
           return reply.status(500).send(result);
         }
 
         if (result && Array.isArray(result.data) && result.data.length > 0) {
-          await redisSetCache(cacheKey, result, 168);
+          await redisSetCache(cacheKey, result, 720);
         }
         return reply.status(200).send(result);
       } catch (error) {
@@ -437,7 +517,12 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
 
       try {
         const result = await flixhq.fetchSources(episodeId, server);
-
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ episodeId, server, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result }, `External API Error.`);
           return reply.status(500).send(result);

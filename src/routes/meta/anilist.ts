@@ -21,12 +21,27 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
     let perPage = Number(request.query.perPage) || 20;
     perPage = Math.min(perPage, 50);
+    const cacheKey = `anilist-search-${q}-${page}-${perPage}`;
+    const cachedData = await redisGetCache(cacheKey);
+    if (cachedData) return reply.status(200).send(cachedData);
 
     try {
       const result = await anilist.search(q, page, perPage);
+
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ q, page, perPage, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
+
       if ('error' in result) {
         request.log.error({ result, q, page, perPage }, `External API Error: Failed to fetch search results`);
         return reply.status(500).send(result);
+      }
+
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 0);
       }
 
       return reply.status(200).send(result);
@@ -54,6 +69,13 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await anilist.fetchInfo(id);
+
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ id, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch animeinfo `);
         return reply.status(500).send(result);
@@ -126,13 +148,18 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
             result = await anilist.fetchMostPopular(page, perPage);
             break;
         }
-
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ category, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, page, perPage }, `External API Error: Failed to fetch top animelist `);
           return reply.status(500).send(result);
         }
 
-        let duration = category === 'airing' || category === 'trending' ? 24 : 168;
+        let duration = category === 'airing' || category === 'trending' || category === 'upcoming' ? 24 : 336; //lol remember to swap this around
 
         if (result && Array.isArray(result.data) && result.data.length > 0) {
           await redisSetCache(cacheKey, result, duration);
@@ -165,6 +192,12 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await anilist.fetchCharacters(Number(id));
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ id, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch characters `);
         return reply.status(500).send(result);
@@ -199,13 +232,19 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await anilist.fetchRelatedAnime(Number(id));
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ id, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch related anime.`);
         return reply.status(500).send(result);
       }
 
       if (result && Array.isArray(result.data) && result.data.length > 0) {
-        await redisSetCache(cacheKey, result, 178);
+        await redisSetCache(cacheKey, result, 336);
       }
 
       return reply.status(200).send(result);
@@ -264,6 +303,12 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await anilist.fetchMediaSchedule(Number(id));
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ id, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch media schedule.`);
         return reply.status(500).send(result);
@@ -324,6 +369,12 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
       try {
         const result = await anilist.fetchSeasonalAnime(season, year, page, perPage, format);
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ season, year, page, perPage, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error(
             { result, season, year, page, perPage, format },
@@ -333,7 +384,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
         }
 
         if (result && Array.isArray(result.data) && result.data.length > 0) {
-          await redisSetCache(cacheKey, result, 168);
+          await redisSetCache(cacheKey, result, 336);
         }
 
         return reply.status(200).send(result);
@@ -347,7 +398,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/mappings/:id',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
-      reply.header('Cache-Control', `public, s-maxage=${12 * 60 * 60}, stale-while-revalidate=300`);
+      reply.header('Cache-Control', `public, s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
       const id = Number(request.params.id);
       const provider = (request.query.provider as 'allanime' | 'hianime' | 'animepahe' | 'anizone') || 'hianime';
@@ -373,13 +424,19 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
       try {
         const result = await anilist.fetchProviderId(id, provider);
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ id, provider, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, id, provider }, `External API Error: Failed to fetch provider info.`);
           return reply.status(500).send(result);
         }
 
         if (result && result.data !== null && result.provider !== null && result.data.format.toLowerCase() !== 'movie') {
-          result.data.status.toLowerCase() === 'finished' ? (duration = 0) : (duration = 24);
+          result.data.status.toLowerCase() === 'finished' ? (duration = 0) : (duration = 48);
           await redisSetCache(cacheKey, result, duration);
         }
         return reply.status(200).send(result);
@@ -420,6 +477,12 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
 
       try {
         const result = await anilist.fetchAnimeProviderEpisodes(id, provider);
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ id, provider, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, id, provider }, `External API Error: Failed to fetch provider episodes.`);
           return reply.status(500).send(result);
@@ -432,7 +495,9 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
           result.providerEpisodes.length > 0 &&
           result.data.format.toLowerCase() !== 'movie'
         ) {
-          result.data.status.toLowerCase() === 'finished' ? (duration = 168) : (duration = 2);
+          result.data.status.toLowerCase() === 'finished' && result.providerEpisodes.length === result.data.episodes
+            ? (duration = 0)
+            : (duration = 1);
           await redisSetCache(cacheKey, result, duration);
         }
         return reply.status(200).send(result);

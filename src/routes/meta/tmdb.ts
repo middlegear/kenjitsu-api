@@ -14,15 +14,25 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
 
     if (!q) return reply.status(400).send({ error: "Missing required query param: 'q'" });
     if (q.length > 1000) return reply.status(400).send({ error: 'Query string too long' });
+    const cacheKey = `tmdb-search-movie-${q}-${page}`;
+    const cachedData = await redisGetCache(cacheKey);
+    if (cachedData) return reply.status(200).send(cachedData);
 
     try {
       const result = await tmdb.searchMovie(q, page);
-
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ q, page, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, q, page }, `External API Error: Failed to fetch search results`);
         return reply.status(500).send(result);
       }
-
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 0);
+      }
       return reply.status(200).send(result);
     } catch (error) {
       request.log.error({ error }, `Internal runtime error occurred while querying search results`);
@@ -36,15 +46,25 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
 
     if (!q) return reply.status(400).send({ error: "Missing required query param: 'q'" });
     if (q.length > 1000) return reply.status(400).send({ error: 'Query string too long' });
-
+    const cacheKey = `tmdb-search-tv-${q}-${page}`;
+    const cachedData = await redisGetCache(cacheKey);
+    if (cachedData) return reply.status(200).send(cachedData);
     try {
       const result = await tmdb.searchShows(q, page);
 
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ q, page, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, q, page }, `External API Error: Failed to fetch search results`);
         return reply.status(500).send(result);
       }
-
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 0);
+      }
       return reply.status(200).send(result);
     } catch (error) {
       request.log.error({ error }, `Internal runtime error occurred while querying search results`);
@@ -91,6 +111,12 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
           case 'releasing':
             result = await tmdb.fetchReleasingMovies(page);
             break;
+        }
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ category, page, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
         }
         if ('error' in result) {
           request.log.error({ result, page, category }, `External API Error: Failed to fetch ${category} movies`);
@@ -149,7 +175,12 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
             result = await tmdb.fetchAiringTv(page);
             break;
         }
-
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ category, page, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, page, category }, `External API Error: Failed to fetch ${category} tv`);
           return reply.status(500).send(result);
@@ -183,6 +214,12 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await tmdb.fetchMovieInfo(Number(id));
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ id, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch media info`);
         return reply.status(500).send(result);
@@ -212,6 +249,12 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await tmdb.fetchShowInfo(Number(id));
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ id, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch media info`);
         return reply.status(500).send(result);
@@ -240,14 +283,19 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await tmdb.fetchMovieProviderId(Number(id));
-
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ id, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch provider info`);
         return reply.status(500).send(result);
       }
 
       if (result && result.data !== null && result.provider !== null) {
-        await redisSetCache(cacheKey, result, 168);
+        await redisSetCache(cacheKey, result, 336);
       }
 
       return reply.status(200).send(result);
@@ -272,14 +320,19 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await tmdb.fetchTvProviderId(Number(id));
-
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ id, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch provider info`);
         return reply.status(500).send(result);
       }
 
       if (result && result.data !== null && result.provider !== null) {
-        await redisSetCache(cacheKey, result, 168);
+        await redisSetCache(cacheKey, result, 336);
       }
 
       return reply.status(200).send(result);
@@ -298,7 +351,7 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
     if (timeWindow !== 'week' && timeWindow !== 'day') {
       return reply.status(400).send({ error: `Invalid timeWindow: '${timeWindow}'. Expected 'day' or 'week'` });
     }
-    const duration = timeWindow === 'week' ? 336 : 24;
+    const duration = timeWindow === 'week' ? 168 : 24;
     const cacheKey = `tmdb-trending-movie-${page}`;
 
     const cachedData = await redisGetCache(cacheKey);
@@ -306,7 +359,12 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await tmdb.fetchTrendingMovies(timeWindow, page);
-
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ timeWindow, page, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, page, timeWindow }, `External API Error: Failed to fetch trending media`);
         return reply.status(500).send(result);
@@ -332,14 +390,19 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
     if (timeWindow !== 'week' && timeWindow !== 'day') {
       return reply.status(400).send({ error: `Invalid timeWindow: '${timeWindow}'. Expected 'day' or 'week'` });
     }
-    const duration = timeWindow === 'week' ? 336 : 24;
+    const duration = timeWindow === 'week' ? 168 : 24;
     const cacheKey = `tmdb-trending-tv-${page}`;
     const cachedData = await redisGetCache(cacheKey);
     if (cachedData) return reply.status(200).send(cachedData);
 
     try {
       const result = await tmdb.fetchTrendingTv(timeWindow, page);
-
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ timeWindow, page, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, page, timeWindow }, `External API Error: Failed to fetch trending media`);
         return reply.status(500).send(result);
@@ -375,7 +438,12 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await tmdb.fetchTvEpisodes(Number(id), Number(season));
-
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ id, season, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, id, season }, `External API Error: Failed to fetch seasonal tv episodes`);
         return reply.status(500).send(result);
@@ -417,12 +485,18 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
 
       try {
         const result = await tmdb.fetchEpisodeInfo(Number(id), Number(season), Number(episode));
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ id, season, episode, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, id, season, episode }, `External API Error: Failed to fetch tv episodeInfo`);
           return reply.status(500).send(result);
         }
         if (result && result.data !== null) {
-          await redisSetCache(cacheKey, result, 0);
+          await redisSetCache(cacheKey, result, 720);
         }
         return reply.status(200).send(result);
       } catch (error) {
@@ -443,6 +517,12 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await tmdb.fetchMovieSources(Number(id));
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ id, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch sources`);
         return reply.status(500).send(result);
@@ -477,6 +557,12 @@ export default async function TheMovieDatabaseRoutes(fastify: FastifyInstance) {
 
       try {
         const result = await tmdb.fetchTvSources(Number(id), Number(season), Number(episode));
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ id, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, id, season, episode }, `External API Error: Failed to fetch sources`);
           return reply.status(500).send(result);

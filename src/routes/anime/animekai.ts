@@ -1,10 +1,12 @@
+import 'dotenv/config';
 import { Animekai, type IAnimeCategory, type IMetaFormat } from '@middlegear/kenjitsu-extensions';
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { IAMetaFormatArr, IAnimeCategoryArr, type FastifyParams, type FastifyQuery } from '../../utils/types.js';
 import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
 import { splitEpisodes } from '../../utils/cache.js';
 
-const animekai = new Animekai('https://animekai.to');
+const baseUrl = process.env.ANIMEKAIURL || 'https://animekai.to';
+const animekai = new Animekai(baseUrl);
 
 export default async function AnimekaiRoutes(fastify: FastifyInstance) {
   fastify.get('/home', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -12,7 +14,12 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await animekai.fetchHome();
-
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result }, `External API Error: Failed to fetch home results`);
         return reply.status(500).send(result);
@@ -32,11 +39,25 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
     if (!q) return reply.status(400).send({ error: "Missing required query parameter: 'q'" });
     if (q.length > 1000) return reply.status(400).send({ error: 'Query string too long' });
 
+    const cacheKey = `animekai-search-${q}-${page}`;
+    const cachedData = await redisGetCache(cacheKey);
+    if (cachedData) return reply.status(200).send(cachedData);
     try {
       const result = await animekai.search(q, page);
+
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ q, page, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, q, page }, `External API Error: Failed to fetch search results.`);
         return reply.status(500).send(result);
+      }
+
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 0);
       }
       return reply.status(200).send(result);
     } catch (error) {
@@ -48,7 +69,7 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/anime/recent/:status',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
-      reply.header('Cache-Control', `public, s-maxage=${0.5 * 60 * 60}, stale-while-revalidate=300`);
+      reply.header('Cache-Control', `public, s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
 
       const page = request.query.page || 1;
       const status = request.params.status as 'completed' | 'added' | 'updated';
@@ -83,7 +104,12 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
             result = await animekai.fetchRecentlyUpdated(format, page);
             break;
         }
-
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ status, page, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, page, status, format }, `External API Error: Failed to fetch recent anime`);
           return reply.status(500).send(result);
@@ -123,14 +149,19 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
 
       try {
         const result = await animekai.fetchAnimeCategory(format, page);
-
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ format, page, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, format, page }, `External API Error: Failed to fetch anime format`);
           return reply.status(500).send(result);
         }
 
         if (result.data && Array.isArray(result.data) && result.data.length > 0) {
-          await redisSetCache(cacheKey, result, 48);
+          await redisSetCache(cacheKey, result, 24);
         }
 
         return reply.status(200).send(result);
@@ -161,6 +192,12 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await animekai.fetchTopAiring(format, page);
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ format, page, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, format, page }, `External API Error: Failed to fetch top airing anime`);
         return reply.status(500).send(result);
@@ -199,7 +236,12 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
 
       try {
         const result = await animekai.fetchGenres(genre, page);
-
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ genre, page, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result }, `External API Error: Failed to fetch genre`);
           return reply.status(500).send(result);
@@ -218,7 +260,6 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
   fastify.get('/anime/:id', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `public, s-maxage=${0.5 * 60 * 60}, stale-while-revalidate=300`);
 
-    let duration;
     const id = request.params.id;
 
     if (!id) {
@@ -233,7 +274,12 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
     }
     try {
       const result = await animekai.fetchAnimeInfo(id);
-
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ id, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch info`);
         return reply.status(500).send(result);
@@ -292,6 +338,12 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
       try {
         const result = await animekai.fetchServers(episodeId);
 
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ episodeId, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, episodeId }, `External API Error: Failed to fetch server info`);
           return reply.status(500).send(result);
@@ -331,6 +383,12 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
       try {
         const result = await animekai.fetchEmbedServers(episodeId, version, server);
 
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ episodeId, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, server, version, episodeId }, `External API Error: Failed to fetch embed servers`);
           return reply.status(500).send(result);
@@ -368,6 +426,12 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
       try {
         const result = await animekai.fetchSources(episodeId, version, server);
 
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ episodeId, version, server, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, server, episodeId, version }, `External API Error: Failed to fetch sources.`);
           return reply.status(500).send(result);

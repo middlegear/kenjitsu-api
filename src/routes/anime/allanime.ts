@@ -1,6 +1,8 @@
+import 'dotenv/config';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { AllAnime } from '@middlegear/kenjitsu-extensions';
 import type { AllAnimeServers, FastifyParams, FastifyQuery } from '../../utils/types.js';
+import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
 
 const allanime = new AllAnime();
 
@@ -12,14 +14,24 @@ export default async function AllAnimeRoutes(fastify: FastifyInstance) {
 
     if (!q) return reply.status(400).send({ error: "Missing required query param: 'q'" });
     if (q.length > 1000) return reply.status(400).send({ error: 'Query string too long' });
-
+    const cacheKey = `allanime-search-${q}`;
+    const cachedData = await redisGetCache(cacheKey);
+    if (cachedData) return reply.status(200).send(cachedData);
     try {
       const result = await allanime.search(q);
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ q, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, q }, `External API Error`);
         return reply.status(500).send(result);
       }
-
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 0);
+      }
       return reply.status(200).send(result);
     } catch (error) {
       request.log.error({ error: error }, `Internal runtime error occurred while querying search results`);
@@ -34,14 +46,24 @@ export default async function AllAnimeRoutes(fastify: FastifyInstance) {
     if (!id) {
       return reply.status(400).send({ error: 'Missing required path paramater: id' });
     }
-
+    const cacheKey = `allanime-episodes-${id}`;
+    const cachedData = await redisGetCache(cacheKey);
+    if (cachedData) return reply.status(200).send(cachedData);
     try {
       const result = await allanime.fetchEpisodes(id);
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ id, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error`);
         return reply.status(500).send(result);
       }
-
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 1);
+      }
       return reply.status(200).send(result);
     } catch (error) {
       request.log.error({ error: error }, `Internal runtime error occurred while fetching episodes`);
@@ -64,8 +86,17 @@ export default async function AllAnimeRoutes(fastify: FastifyInstance) {
           error: `Invalid version picked: '${version}'. Expected one of 'sub','dub','raw'.`,
         });
       }
+      const cacheKey = `allanime-servers-${id}-${version}`;
+      const cachedData = await redisGetCache(cacheKey);
+      if (cachedData) return reply.status(200).send(cachedData);
       try {
         const result = await allanime.fetchServers(id);
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ id, version, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, id }, `External API Error`);
           return reply.status(500).send(result);
@@ -114,6 +145,12 @@ export default async function AllAnimeRoutes(fastify: FastifyInstance) {
       }
       try {
         const result = await allanime.fetchSources(episodeId, server, version);
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ episodeId, version, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, episodeId, version }, `External API Error`);
           return reply.status(500).send(result);

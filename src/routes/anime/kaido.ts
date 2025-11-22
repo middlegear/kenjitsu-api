@@ -1,8 +1,11 @@
+import 'dotenv/config';
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { Kaido, type HIGenre, type IAnimeCategory } from '@middlegear/kenjitsu-extensions';
 import { IAnimeCategoryArr, type FastifyParams, type FastifyQuery } from '../../utils/types.js';
 import { redisGetCache, redisSetCache } from '../../middleware/cache.js';
-const zoro = new Kaido();
+
+const baseUrl = process.env.KAIDOURL || 'https://kaido.to';
+const zoro = new Kaido(baseUrl);
 
 export default async function KaidoRoutes(fastify: FastifyInstance) {
   fastify.get('/home', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -16,13 +19,18 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await zoro.fetchHome();
-
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result }, `External API Error`);
         return reply.status(500).send(result);
       }
       if (result && result.data.length > 0 && result.mostPopular.length > 0) {
-        await redisSetCache(cacheKey, result, 12);
+        await redisSetCache(cacheKey, result, 4);
       }
 
       return reply.status(200).send(result);
@@ -39,14 +47,24 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
     if (!q) return reply.status(400).send({ error: "Missing required query param: 'q'" });
     if (q.length > 1000) return reply.status(400).send({ error: 'Query string too long' });
 
+    const cacheKey = `zoro-search-${q}-${page}`;
+    const cachedData = await redisGetCache(cacheKey);
+    if (cachedData) return reply.status(200).send(cachedData);
     try {
       const result = await zoro.search(q, page);
-
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ q, page, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, q, page }, `External API Error.`);
         return reply.status(500).send(result);
       }
-
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 0);
+      }
       return reply.status(200).send(result);
     } catch (error) {
       request.log.error({ error: error }, `Internal runtime error occurred.`);
@@ -57,25 +75,28 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
   fastify.get('/anime/suggestions', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `public, s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
 
-    let q = request.query.q?.trim() ?? '';
-    q = decodeURIComponent(q);
-    q = q.replace(/[^\w\s\-_.]/g, '');
+    const { q } = request.query;
+    if (!q) return reply.status(400).send({ error: "Missing required query param: 'q'" });
+    if (q.length > 1000) return reply.status(400).send({ error: 'Query string too long' });
 
-    if (!q.length) {
-      return reply.status(400).send({ error: "Missing required query params: 'q' " });
-    }
-    if (q.length > 1000) {
-      return reply.status(400).send({ error: 'query string too long' });
-    }
-
+    const cacheKey = `zoro-suggestions-${q}`;
+    const cachedData = await redisGetCache(cacheKey);
+    if (cachedData) return reply.status(200).send(cachedData);
     try {
       const result = await zoro.searchSuggestions(q);
-
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ q, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, q }, `External API Error`);
         return reply.status(500).send(result);
       }
-
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        await redisSetCache(cacheKey, result, 0);
+      }
       return reply.status(200).send(result);
     } catch (error) {
       request.log.error({ error: error }, `Internal runtime error occurred.`);
@@ -93,7 +114,7 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
     }
 
     let duration;
-    const cacheKey = `kaido-info-${id}`;
+    const cacheKey = `zoro-info-${id}`;
     const cachedData = await redisGetCache(cacheKey);
 
     if (cachedData) {
@@ -102,6 +123,12 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await zoro.fetchAnimeInfo(id);
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ id, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error `);
         return reply.status(500).send(result);
@@ -165,7 +192,12 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
             result = await zoro.fetchTopAiring(page);
             break;
         }
-
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ category, page, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, page, category }, `External API Error`);
           return reply.status(500).send(result);
@@ -222,7 +254,12 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
             result = await zoro.fetchRecentlyAdded(page);
             break;
         }
-
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ status, page, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, page, status }, `External API Error: Failed to fetch recent anime`);
           return reply.status(500).send(result);
@@ -250,7 +287,7 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
         return reply.status(400).send({ error: `Missing required path parameter: sort` });
       }
 
-      const cacheKey = `kaido-sort-${sort}-${page}`;
+      const cacheKey = `zoro-sort-${sort}-${page}`;
 
       const cachedData = await redisGetCache(cacheKey);
       if (cachedData) {
@@ -259,7 +296,12 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
 
       try {
         const result = await zoro.fetchAtoZList(sort, page);
-
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ sort, page, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, sort, page }, `External API Error`);
           return reply.status(500).send(result);
@@ -303,6 +345,12 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
 
       try {
         const result = await zoro.fetchAnimeCategory(format, page);
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ format, page, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, page, format }, `External API Error`);
           return reply.status(500).send(result);
@@ -332,7 +380,7 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
         });
       }
 
-      const cacheKey = `kaido-genre-${genre}-${page}`;
+      const cacheKey = `zoro-genre-${genre}-${page}`;
       const cachedData = await redisGetCache(cacheKey);
       if (cachedData) {
         return reply.status(200).send(cachedData);
@@ -340,7 +388,12 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
 
       try {
         const result = await zoro.fetchGenre(genre, page);
-
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ genre, page, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, page, genre }, `External API Error: Failed to fetch genre list`);
           return reply.status(500).send(result);
@@ -362,7 +415,7 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
 
     const id = String(request.params.id);
 
-    const cacheKey = `kaido-episodes-${id}`;
+    const cacheKey = `zoro-episodes-${id}`;
     const cachedData = await redisGetCache(cacheKey);
     if (cachedData) {
       return reply.status(200).send(cachedData);
@@ -376,7 +429,12 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
 
     try {
       const result = await zoro.fetchEpisodes(id);
-
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ id, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
       if ('error' in result) {
         request.log.error({ result, id }, `External API Error: Failed to fetch episode list`);
         return reply.status(500).send(result);
@@ -411,14 +469,19 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
 
       try {
         const result = await zoro.fetchServers(episodeId);
-
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ episodeId, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, episodeId }, `External API Error: Failed to fetch server list`);
           return reply.status(500).send(result);
         }
 
         if (result && Array.isArray(result.data) && result.data.length > 0) {
-          await redisSetCache(cacheKey, result, 24);
+          await redisSetCache(cacheKey, result, 48);
         }
 
         return reply.status(200).send(result);
@@ -455,7 +518,12 @@ export default async function KaidoRoutes(fastify: FastifyInstance) {
       }
       try {
         const result = await zoro.fetchSources(episodeId, server, version);
-
+        if (!result || typeof result !== 'object') {
+          request.log.warn({ episodeId, version, server, result }, 'External provider returned null/undefined');
+          return reply.status(502).send({
+            error: 'External provider returned an invalid response(null)',
+          });
+        }
         if ('error' in result) {
           request.log.error({ result, episodeId, server, version }, `External API Error: Failed to fetch sources`);
           return reply.status(500).send(result);
