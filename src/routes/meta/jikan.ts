@@ -40,7 +40,7 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
         return reply.status(500).send(result);
       }
       if (result && Array.isArray(result.data) && result.data.length > 0) {
-        await redisSetCache(cacheKey, result, 0);
+        await redisSetCache(cacheKey, result, 168);
       }
       return reply.status(200).send(result);
     } catch (error) {

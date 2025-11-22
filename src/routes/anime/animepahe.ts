@@ -33,7 +33,7 @@ export default async function AnimepaheRoutes(fastify: FastifyInstance) {
       }
 
       if (result && Array.isArray(result.data) && result.data.length > 0) {
-        await redisSetCache(cacheKey, result, 0);
+        await redisSetCache(cacheKey, result, 168);
       }
 
       return reply.status(200).send(result);
