@@ -33,6 +33,9 @@ const app = Fastify({
 
         headers: {
           'user-agent': req.headers['user-agent'],
+          host: req.headers['host'],
+          referer: req.headers['referer'],
+          origin: req.headers['origin'],
         },
       }),
       error: error => ({
