@@ -23,6 +23,9 @@ export default async function StaticRoutes(fastify: FastifyInstance) {
   });
 
   fastify.setNotFoundHandler(async (request: FastifyRequest, reply: FastifyReply) => {
-    return reply.status(404).sendFile('404.html');
+    return reply.status(404).send({
+      error: 'Route Not Found',
+      message: ` Congratulations! You've successfully navigated to the internet's equivalent of an empty parking space`,
+    });
   });
 }
