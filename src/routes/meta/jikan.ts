@@ -301,7 +301,8 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       reply.header('Cache-Control', `public, s-maxage=${24 * 60 * 60}, stale-while-revalidate=300`);
 
       const id = Number(request.params.id);
-      const provider = (request.query.provider as 'allanime' | 'hianime' | 'animepahe' | 'anizone') || 'hianime';
+      const provider =
+        (request.query.provider as 'allanime' | 'hianime' | 'animepahe' | 'anizone' | 'animekai') || 'hianime';
 
       if (!id) {
         return reply.status(400).send({
@@ -354,7 +355,8 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       reply.header('Cache-Control', `public, s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
 
       const id = Number(request.params.id);
-      const provider = (request.query.provider as 'allanime' | 'hianime' | 'animepahe' | 'anizone') || 'hianime';
+      const provider =
+        (request.query.provider as 'allanime' | 'hianime' | 'animepahe' | 'anizone' | 'animekai') || 'hianime';
 
       if (!id) {
         return reply.status(400).send({
