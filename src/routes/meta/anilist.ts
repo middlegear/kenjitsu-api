@@ -288,9 +288,13 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
   fastify.get('/schedule/:id', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `public, s-maxage=${12 * 60 * 60}, stale-while-revalidate=300`);
 
-    const id = request.params.id;
+    const id = Number(request.params.id);
 
-    if (!id) {
+    if (isNaN(id)) {
+      return reply.status(400).send({
+        error: 'The id must be an anilistId',
+      });
+    } else if (!id) {
       return reply.status(400).send({
         error: "Missing required path parameter: 'id'.",
       });
@@ -302,7 +306,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      const result = await anilist.fetchMediaSchedule(Number(id));
+      const result = await anilist.fetchMediaSchedule(id);
       if (!result || typeof result !== 'object') {
         request.log.warn({ id, result }, 'External provider returned null/undefined');
         return reply.status(502).send({
@@ -404,7 +408,11 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       const provider =
         (request.query.provider as 'allanime' | 'hianime' | 'animepahe' | 'anizone' | 'animekai') || 'hianime';
 
-      if (!id) {
+      if (isNaN(id)) {
+        return reply.status(400).send({
+          error: 'The id must be an anilistId',
+        });
+      } else if (!id) {
         return reply.status(400).send({
           error: "Missing required path parameter: 'id'.",
         });
@@ -457,7 +465,11 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       const provider =
         (request.query.provider as 'allanime' | 'hianime' | 'animepahe' | 'anizone' | 'animekai') || 'hianime';
 
-      if (!id) {
+      if (isNaN(id)) {
+        return reply.status(400).send({
+          error: 'The id must be an anilistId',
+        });
+      } else if (!id) {
         return reply.status(400).send({
           error: "Missing required path parameter: 'id'.",
         });

@@ -304,7 +304,11 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       const provider =
         (request.query.provider as 'allanime' | 'hianime' | 'animepahe' | 'anizone' | 'animekai') || 'hianime';
 
-      if (!id) {
+      if (isNaN(id)) {
+        return reply.status(400).send({
+          error: 'The id must be a malId',
+        });
+      } else if (!id) {
         return reply.status(400).send({
           error: "Missing required path parameter: 'id'.",
         });
@@ -358,7 +362,11 @@ export default async function JikanRoutes(fastify: FastifyInstance) {
       const provider =
         (request.query.provider as 'allanime' | 'hianime' | 'animepahe' | 'anizone' | 'animekai') || 'hianime';
 
-      if (!id) {
+      if (isNaN(id)) {
+        return reply.status(400).send({
+          error: 'The id must be a malId',
+        });
+      } else if (!id) {
         return reply.status(400).send({
           error: "Missing required path parameter: 'id'.",
         });
