@@ -6,7 +6,6 @@
   "type": "module",
   "scripts": {
     "start": "node dist/server.js",
-    "commit": "tsc && cz ",
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
     "lint": "tsc"
@@ -17,7 +16,7 @@
   },
   "keywords": [
     "anime",
-    "movie",
+    "movies",
     "tv"
   ],
   "author": "middlegear",
@@ -27,19 +26,10 @@
   },
   "homepage": "https://github.com/middlegear/kenjitsu-api#readme",
   "devDependencies": {
-    "@commitlint/cli": "^20.1.0",
-    "@commitlint/config-conventional": "^20.0.0",
     "@types/node": "^24.10.1",
-    "commitizen": "^4.3.1",
-    "cz-conventional-changelog": "^3.3.0",
     "prettier": "^3.7.3",
-    "tsx": "^4.20.6",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
-  },
-  "config": {
-    "commitizen": {
-      "path": "cz-conventional-changelog"
-    }
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",
