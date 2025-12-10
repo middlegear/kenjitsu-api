@@ -293,7 +293,7 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
         const { sub, dub } = splitEpisodes(result.providerEpisodes);
         const status = (result.data.status ?? '').toLowerCase();
 
-        let duration: number; // in hours
+        let duration: number;
 
         if (status === 'completed') {
           const subMatchesDub = sub.length > 0 && sub.length === dub.length && sub.every((n, i) => n === dub[i]);
