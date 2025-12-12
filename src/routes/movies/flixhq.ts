@@ -66,8 +66,34 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
         request.log.error({ result, q, page }, `External API Error: Failed to fetch search results.`);
         return reply.status(500).send(result);
       }
+
+      // FILTER: Keep only exact title matches (case-insensitive)
       if (result && Array.isArray(result.data) && result.data.length > 0) {
-        await redisSetCache(cacheKey, result, 168);
+        const exactMatches = result.data.filter((item: any) =>
+          (item.name || item.title)?.toLowerCase() === q.toLowerCase()
+        );
+
+        request.log.info(`Found ${exactMatches.length} exact matches for "${q}" out of ${result.data.length} results`);
+
+        // If no exact match, log available results for debugging
+        if (exactMatches.length === 0) {
+          request.log.warn(
+            { available: result.data.slice(0, 5).map((r: any) => r.name || r.title) },
+            `No exact match found for: ${q}`
+          );
+        }
+
+        // Return filtered results with exact matches only
+        const filteredResult = {
+          ...result,
+          data: exactMatches.length > 0 ? exactMatches : [],
+        };
+
+        if (exactMatches.length > 0) {
+          await redisSetCache(cacheKey, filteredResult, 168);
+        }
+
+        return reply.status(200).send(filteredResult);
       }
 
       return reply.status(200).send(result);
