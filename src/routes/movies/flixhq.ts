@@ -66,24 +66,54 @@ export default async function FlixHQRoutes(fastify: FastifyInstance) {
         request.log.error({ result, q, page }, `External API Error: Failed to fetch search results.`);
         return reply.status(500).send(result);
       }
-
-      // FILTER: Keep only exact title matches (case-insensitive)
       if (result && Array.isArray(result.data) && result.data.length > 0) {
-        const exactMatches = result.data.filter((item: any) =>
-          (item.name || item.title)?.toLowerCase() === q.toLowerCase()
-        );
+        await redisSetCache(cacheKey, result, 168);
+      }
+
+      return reply.status(200).send(result);
+    } catch (error) {
+      request.log.error({ error: error }, `Internal runtime error occurred while querying search results`);
+      return reply.status(500).send({ error: `Internal server error occurred: ${error}` });
+    }
+  });
+  fastify.get('/media/lookup/title', async (request: FastifyRequest<{ Querystring: FastifyQuery }>, reply: FastifyReply) => {
+    reply.header('Cache-Control', `public, s-maxage=${148 * 60 * 60}, stale-while-revalidate=300`);
+
+    const { q, page = 1 } = request.query;
+
+    if (!q) return reply.status(400).send({ error: "Missing required query param: 'q'" });
+    if (q.length > 1000) return reply.status(400).send({ error: 'Query string too long' });
+
+    const cacheKey = `flix-lookup-${q}-${page}`;
+    const cachedData = await redisGetCache(cacheKey);
+    if (cachedData) return reply.status(200).send(cachedData);
+
+    try {
+      const result = await flixhq.search(q, page);
+
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ q, page, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
+      if ('error' in result) {
+        request.log.error({ result, q, page }, `External API Error: Failed to fetch search results.`);
+        return reply.status(500).send(result);
+      }
+
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        const exactMatches = result.data.filter((item: any) => (item.name || item.title)?.toLowerCase() === q.toLowerCase());
 
         request.log.info(`Found ${exactMatches.length} exact matches for "${q}" out of ${result.data.length} results`);
 
-        // If no exact match, log available results for debugging
         if (exactMatches.length === 0) {
           request.log.warn(
             { available: result.data.slice(0, 5).map((r: any) => r.name || r.title) },
-            `No exact match found for: ${q}`
+            `No exact match found for: ${q}`,
           );
         }
 
-        // Return filtered results with exact matches only
         const filteredResult = {
           ...result,
           data: exactMatches.length > 0 ? exactMatches : [],
