@@ -524,7 +524,7 @@ export default async function hianimeRoutes(fastify: FastifyInstance) {
 
       const episodeId = String(request.params.episodeId);
       const version = (request.query.version as 'sub' | 'dub' | 'raw') || 'sub';
-      const server = (request.query.server as 'hd-1' | 'hd-2' | 'hd-3') || 'hd-2';
+      const server = (request.query.server as 'hd-1' | 'hd-2') || 'hd-2'; /// removed hd-3 cant support playback
 
       if (!episodeId) {
         return reply.status(400).send({
@@ -536,9 +536,9 @@ export default async function hianimeRoutes(fastify: FastifyInstance) {
           error: `Invalid version picked: '${version}'. Expected one of 'sub','dub','raw'.`,
         });
       }
-      if (!['hd-1', 'hd-2', 'hd-3'].includes(server)) {
+      if (!['hd-1', 'hd-2'].includes(server)) {
         return reply.status(400).send({
-          error: `Invalid  streaming server selected: '${server}'. Expected one of 'hd-1', 'hd-2', 'hd-3'.`,
+          error: `Invalid  streaming server selected: '${server}'. Expected one of 'hd-1', 'hd-2'.`,
         });
       }
       try {
