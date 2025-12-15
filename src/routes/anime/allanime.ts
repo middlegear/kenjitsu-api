@@ -101,7 +101,9 @@ export default async function AllAnimeRoutes(fastify: FastifyInstance) {
           request.log.error({ result, id }, `External API Error`);
           return reply.status(500).send(result);
         }
-
+        if (result && Array.isArray(result.data) && result.data.length > 0) {
+          await redisSetCache(cacheKey, result, 24);
+        }
         return reply.status(200).send(result);
       } catch (error) {
         request.log.error({ error: error }, `Internal runtime error occurred while fetching episodes`);
@@ -112,7 +114,7 @@ export default async function AllAnimeRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/sources/:episodeId',
     async (request: FastifyRequest<{ Params: FastifyParams; Querystring: FastifyQuery }>, reply: FastifyReply) => {
-      reply.header('Cache-Control', `public, s-maxage=${0.5 * 60 * 60}, stale-while-revalidate=300`);
+      reply.header('Cache-Control', `public, s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
 
       const episodeId = request.params.episodeId;
       const version = (request.query.version as 'sub' | 'dub' | 'raw') || 'sub';
