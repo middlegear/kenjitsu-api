@@ -4,14 +4,18 @@
 A lightweight, high-performance Node.js API built with **Fastify** for delivering detailed metadata and streaming sources for anime, movies, and TV shows.
 
 
-## 🚀 Features
+## Features
 
 *  **Fast and efficient**  built on Fastify for optimal performance
 *   **Comprehensive endpoints** for anime, movies, and TV series
 *   **JSON-based responses** — ready for integration with web and mobile apps
 
 
-### Pull the Docker image
+
+### Deploy to Koyeb (One-Click)
+[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=docker&image=ghcr.io/middlegear/kenjitsu-api:latest)
+
+### Docker Image
 
 ```bash
 docker pull ghcr.io/middlegear/kenjitsu-api:latest
@@ -20,8 +24,9 @@ docker pull ghcr.io/middlegear/kenjitsu-api:latest
 
 ## Documentation
 
-Full API reference and usage examples are available at
- [**kenjitsu-docs.vercel.app**](https://kenjitsu-docs.vercel.app)
+Complete API reference including endpoints, request parameters, and response schemas:
+
+ **[kenjitsu-docs.vercel.app](https://kenjitsu-docs.vercel.app)**
 
 
 
