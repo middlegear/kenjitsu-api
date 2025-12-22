@@ -39,6 +39,38 @@ export default async function AllAnimeRoutes(fastify: FastifyInstance) {
     }
   });
 
+  fastify.get('/anime/:id', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
+    reply.header('Cache-Control', `public, s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
+
+    const id = request.params.id;
+    if (!id) {
+      return reply.status(400).send({ error: 'Missing required path paramater: id' });
+    }
+    const cacheKey = `allanime-info-${id}`;
+    const cachedData = await redisGetCache(cacheKey);
+    if (cachedData) return reply.status(200).send(cachedData);
+    try {
+      const result = await allanime.fetchAnimeInfo(id);
+      if (!result || typeof result !== 'object') {
+        request.log.warn({ id, result }, 'External provider returned null/undefined');
+        return reply.status(502).send({
+          error: 'External provider returned an invalid response(null)',
+        });
+      }
+      if ('error' in result) {
+        request.log.error({ result, id }, `External API Error`);
+        return reply.status(500).send(result);
+      }
+      if (result && result.data && result.data !== null) {
+        await redisSetCache(cacheKey, result, 24);
+      }
+      return reply.status(200).send(result);
+    } catch (error) {
+      request.log.error({ error: error }, `Internal runtime error occurred while fetching episodes`);
+      return reply.status(500).send({ error: `Internal server error occurred: ${error}` });
+    }
+  });
+
   fastify.get('/anime/:id/episodes', async (request: FastifyRequest<{ Params: FastifyParams }>, reply: FastifyReply) => {
     reply.header('Cache-Control', `public, s-maxage=${1 * 60 * 60}, stale-while-revalidate=300`);
 
@@ -70,6 +102,7 @@ export default async function AllAnimeRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({ error: `Internal server error occurred: ${error}` });
     }
   });
+
   fastify.get(
     '/episode/:id/servers',
     async (request: FastifyRequest<{ Params: FastifyParams; Querystring: FastifyQuery }>, reply: FastifyReply) => {
