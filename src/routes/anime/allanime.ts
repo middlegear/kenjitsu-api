@@ -152,7 +152,7 @@ export default async function AllAnimeRoutes(fastify: FastifyInstance) {
       const episodeId = request.params.episodeId;
       const version = (request.query.version as 'sub' | 'dub' | 'raw') || 'sub';
       const allowedServers = [
-        'okru',
+        // 'okru', still busted for playback on exoplayer idk how vlc does this
         'internal-default-hls',
         'internal-ak',
         'internal-s-mp4',
