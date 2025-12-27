@@ -532,7 +532,7 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
             error: 'External provider returned an invalid response(null)',
           });
         }
-        if ('error' in result || result.data === null || result.providerEpisodes === null) {
+        if ('error' in result || result.data === null || result.providerEpisodes.length === 0) {
           request.log.error({ result, id, provider }, `External API Error: Failed to fetch provider episodes.`);
           return reply.status(500).send(result);
         }
