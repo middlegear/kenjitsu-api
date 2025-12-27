@@ -432,7 +432,24 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       }
 
       try {
-        const result = await anilist.fetchProviderId(id, provider);
+        let result;
+        switch (provider) {
+          case 'allanime':
+            result = await anilist.fetchAllAnimeProviderId(id);
+            break;
+          case 'animekai':
+            result = await anilist.fetchAnimeKaiProviderId(id);
+            break;
+          case 'animepahe':
+            result = await anilist.fetchAnimepaheProviderId(id);
+            break;
+          case 'anizone':
+            result = await anilist.fetchAnizoneProviderId(id);
+            break;
+          default:
+            result = await anilist.fetchZoroProviderId(id);
+            break;
+        }
         if (!result || typeof result !== 'object') {
           request.log.warn({ id, provider, result }, 'External provider returned null/undefined');
           return reply.status(502).send({
@@ -490,7 +507,25 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
       }
 
       try {
-        const result = await anilist.fetchAnimeProviderEpisodes(id, provider);
+        let result;
+        switch (provider) {
+          case 'allanime':
+            result = await anilist.fetchAllAnimeProviderEpisodes(id);
+            break;
+          case 'animekai':
+            result = await anilist.fetchAnimeKaiProviderEpisodes(id);
+            break;
+          case 'animepahe':
+            result = await anilist.fetchAnimePaheProviderEpisodes(id);
+            break;
+          case 'anizone':
+            result = await anilist.fetchAnizoneProviderEpisodes(id);
+            break;
+          default:
+            result = await anilist.fetchZoroProviderEpisodes(id);
+            break;
+        }
+
         if (!result || typeof result !== 'object') {
           request.log.warn({ id, provider, result }, 'External provider returned null/undefined');
           return reply.status(502).send({
@@ -519,18 +554,6 @@ export default async function AnilistRoutes(fastify: FastifyInstance) {
         request.log.error({ error: error }, `Internal runtime error occurred while fetching provider episodes`);
         return reply.status(500).send({ error: `Internal server error occurred: ${error}` });
       }
-    },
-  );
-
-  fastify.get(
-    '/sources/:episodeId',
-    async (request: FastifyRequest<{ Params: FastifyParams; Querystring: FastifyQuery }>, reply: FastifyReply) => {
-      reply.header('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=60');
-
-      return reply.status(410).send({
-        error: 'Deprecated route',
-        message: 'This endpoint has been removed. Use /api/`your animeprovider`/sources/:episodeId instead.',
-      });
     },
   );
 }
