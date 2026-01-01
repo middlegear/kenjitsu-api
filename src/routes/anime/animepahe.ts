@@ -200,8 +200,8 @@ export default async function AnimepaheRoutes(fastify: FastifyInstance) {
           });
         }
 
-        if (result && Array.isArray(result.data) && result.data.length > 0) {
-          await redisSetCache(cacheKey, result, 12);
+        if (result && typeof result === 'object' && result.data !== null) {
+          await redisSetCache(cacheKey, result, 168);
         }
         return reply.status(200).send(result);
       } catch (error) {

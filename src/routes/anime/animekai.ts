@@ -334,7 +334,9 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
       if (!episodeId) {
         return reply.status(400).send({ error: 'Missing required params: episodeId' });
       }
-
+      const cacheKey = `animekai-servers-${episodeId}`;
+      const cachedData = await redisGetCache(cacheKey);
+      if (cachedData) return reply.status(200).send(cachedData);
       try {
         const result = await animekai.fetchServers(episodeId);
 
@@ -348,7 +350,9 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
           request.log.error({ result, episodeId }, `External API Error: Failed to fetch server info`);
           return reply.status(500).send(result);
         }
-
+        if (result && typeof result === 'object' && result.data !== null) {
+          await redisSetCache(cacheKey, result, 168);
+        }
         return reply.status(200).send(result);
       } catch (error) {
         request.log.error({ error: error }, `Internal runtime error occurred while fetching server info}`);
@@ -356,51 +360,7 @@ export default async function AnimekaiRoutes(fastify: FastifyInstance) {
       }
     },
   );
-  fastify.get(
-    '/episode/:episodeId/embed',
-    async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
-      reply.header('Cache-Control', 'public, s-maxage=420, stale-while-revalidate=180');
 
-      const episodeId = String(request.params.episodeId);
-      const version = (request.query.version as 'sub' | 'dub' | 'raw') || 'sub';
-      const server = (request.query.server as 'server-1' | 'server-2') || 'server-1';
-
-      if (!episodeId) {
-        return reply.status(400).send({ error: 'Missing required params: episodeId' });
-      }
-
-      if (!['server-1', 'server-2'].includes(server)) {
-        return reply.status(400).send({
-          error: `Invalid  streaming server selected: '${server}'. Expected one of 'server-1' or 'server-2'.`,
-        });
-      }
-
-      if (!['sub', 'dub', 'raw'].includes(version)) {
-        return reply.status(400).send({
-          error: `Invalid version: '${version}'. Expected one of 'sub','dub' or 'raw'.`,
-        });
-      }
-      try {
-        const result = await animekai.fetchEmbedServers(episodeId, version, server);
-
-        if (!result || typeof result !== 'object') {
-          request.log.warn({ episodeId, result }, 'External provider returned null/undefined');
-          return reply.status(502).send({
-            error: 'External provider returned an invalid response(null)',
-          });
-        }
-        if ('error' in result) {
-          request.log.error({ result, server, version, episodeId }, `External API Error: Failed to fetch embed servers`);
-          return reply.status(500).send(result);
-        }
-
-        return reply.status(200).send(result);
-      } catch (error) {
-        request.log.error({ error: error }, `Internal runtime error occurred while fetching embed servers}`);
-        return reply.status(500).send({ error: `Internal server error occurred: ${error}` });
-      }
-    },
-  );
   fastify.get(
     '/sources/:episodeId',
     async (request: FastifyRequest<{ Querystring: FastifyQuery; Params: FastifyParams }>, reply: FastifyReply) => {
